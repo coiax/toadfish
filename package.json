@@ -1,0 +1,13 @@
+{
+  "name": "toadfish",
+  "description": "Code for screeps, with an arbitary name.",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/coiax/toadfish"},
+  "license": "MIT",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-screeps": "^1.3.0"
+  }
+}
