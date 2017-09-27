@@ -1,8 +1,10 @@
+var fs = require('fs');
+
 module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-screeps');
 
-    var my_options = require("./screeps-options.json")
+    var my_options = JSON.parse(fs.readFileSync('./screeps-options', 'utf8'))
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
