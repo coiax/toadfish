@@ -8,6 +8,6 @@ register(require("roles_tutorial_upgrader"));
 
 module.exports.run = function(creep) {
     var module = registered[creep.memory.role];
-    if(module !== null)
+    if(!((module === null) || (module === undefined)))
         module.run(creep)
 }
