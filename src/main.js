@@ -1,7 +1,10 @@
 require("prototypes_RoomPosition");
 var task_tutorial_upgrader = require("task_tutorial_upgrader");
+var gc = require("gc");
 
 module.exports.loop = function() {
+    gc.gc();
+
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         if(creep.spawning)
