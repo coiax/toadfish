@@ -8,5 +8,5 @@ module.exports.run = function() {
             count++;
     };
 
-    Game.memory.owned_rooms = count;
+    Memory.owned_rooms = count;
 }

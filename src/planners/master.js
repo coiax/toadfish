@@ -10,14 +10,14 @@ var global_planners = [room_counter];
 var local_planners = [construction, towers];
 
 module.exports.run = function() {
-    for(var gp in global_planners)
-        gp.run();
+    for(var i in global_planners)
+        global_planners[i].run();
 
-    for(var room_name in Game.rooms) {
+    for(var name in Game.rooms) {
         var room = Game.rooms[name];
         if(room.controller && room.controller.my) {
-            for(var lp in local_planners)
-                lp.run(room);
+            for(var j in local_planners)
+                local_planners[j].run(room);
         }
     }
 
