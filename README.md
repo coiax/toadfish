@@ -24,6 +24,23 @@ To start with let the planner only care about the room it's in. Later on we can 
 
 ### RC1
 
+* Maximum creep cost: 300
+* Just upgrade controller (always implied in later levels, just the main point
+  of RC1)
+* No additional construction, this is a very temporary phase
+
 ### RC2
 
+* Build extensions
+* Maximum creep cost: 550
+* Start to construct ultra-optimised roads, if needed
+
 ### RC3
+
+* Dedicated "cows" now possible (WORK*5)
+* Tower construction.
+* Build containers to put grazing output
+
+### RC4
+
+* Build Storage.
