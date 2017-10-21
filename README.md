@@ -40,6 +40,7 @@ To start with let the planner only care about the room it's in. Later on we can 
 * Dedicated "cows" now possible (WORK*5)
 * Tower construction.
 * Build containers to put grazing output
+* Initial safe mode tends to end here.
 
 ### RC4
 
