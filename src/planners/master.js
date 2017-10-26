@@ -9,7 +9,7 @@ var ant_trail = require("planners_local_ant_trail");
 
 // Selected planners to run
 var global_planners = [room_counter];
-var local_planners = [construction, towers, family_planner, ant_trail];
+var local_planners = [construction, towers, family_planner];
 
 module.exports.run = function() {
     for(var i in global_planners)
