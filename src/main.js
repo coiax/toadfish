@@ -13,5 +13,6 @@ module.exports.loop = function() {
         if(creep.spawning)
             continue;
         role_manager.run(creep);
+        creep.visualise_path();
     }
 }
