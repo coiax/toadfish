@@ -21,3 +21,13 @@ RoomPosition.prototype.pack = function() {
 RoomPosition.unpack = function(packed) {
     return new RoomPosition(packed.x, packed.y, packed.roomName);
 };
+
+RoomPosition.prototype.look_for_structure = function(stype) {
+    var structures = this.lookFor(LOOK_STRUCTURES);
+    for(var i in structures) {
+        var struct = structures[i];
+        if(struct.structureType == stype)
+            return struct;
+    }
+    return null;
+};
