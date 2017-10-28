@@ -31,5 +31,13 @@ module.exports.run = function(room) {
         }
     }
 
+    if(ext.path) {
+        var style = {
+            lineStyle: "dotted"
+        };
+
+        room.visualise_path(ext.path, style);
+    }
+
 
 }

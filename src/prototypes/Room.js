@@ -1,10 +1,12 @@
-Room.prototype.visualise_path = function(path) {
+Room.prototype.visualise_path = function(path, style) {
     if(_.isString(path))
         path = Room.deserializePath(path);
 
-    var style = {
-        lineStyle: "dashed"
-    };
+    if(!style) {
+        style = {
+            lineStyle: "dashed"
+        };
+    }
 
     // [ (x0,y0), (x1,y1) ... (xn-2,yn-2), (xn-1,yn-1) ]
     for(var i = 0; i < path.length - 1; i++) {
