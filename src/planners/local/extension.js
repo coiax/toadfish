@@ -104,7 +104,7 @@ var try_sixbox = function(room) {
             var x = key % 50;
 
             var translated = pos.translate(x, y);
-            if(translated.has_planning_obstruction()) {
+            if(translated.has_planning_obstruction(stype)) {
                 good = false;
                 break;
             }
