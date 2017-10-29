@@ -32,13 +32,13 @@ RoomPosition.prototype.look_for_structure = function(stype) {
     return null;
 };
 
-RoomPosition.prototype.has_planning_obstruction = function() {
+RoomPosition.prototype.has_planning_obstruction = function(stype) {
     // Is there anything in this position that would prevent us building
     // a structure here at a later date:
     // - natural walls
     // - a transition edge
-    // - constructed structures
-    // - construction sites
+    // - constructed structures of a different type to `stype`
+    // - construction sites of a different type to `stype`
     // - internal planning to place any of the above
     if(this.is_wall())
         return true;
@@ -46,17 +46,14 @@ RoomPosition.prototype.has_planning_obstruction = function() {
     if(this.x == 0 || this.x == 49 || this.y == 0 || this.y == 49)
         return true;
 
-    var sites = this.lookFor(LOOK_CONSTRUCTION_SITES);
-    for(var i in sites) {
-        var site = sites[i];
-        if(_.includes(OBSTACLE_OBJECT_TYPES, site.structureType))
-            return true;
-    }
+    var stuff = this.lookFor(LOOK_CONSTRUCTION_SITES);
+    stuff.concat(this.lookFor(LOOK_STRUCTURES));
 
-    var structures = this.lookFor(LOOK_STRUCTURES);
-    for(var i in structures) {
-        var struct = structures[i];
-        if(_.includes(OBSTACLE_OBJECT_TYPES, struct.structureType))
+    for(var i in stuff) {
+        var site = stuff[i];
+        if(site.structureType != stype &&
+            _.includes(OBSTACLE_OBJECT_TYPES, site.structureType))
+            //
             return true;
     }
 
