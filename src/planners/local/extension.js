@@ -15,14 +15,15 @@ module.exports.run = function(room) {
         ext.extensions = [];
     if(!ext.spawns)
         ext.spawns = [];
+    if(!ext.roads)
+        ext.roads = [];
 
     if(_.isEmpty(ext.extensions))
         try_sixbox(room);
 
     for(var i in ext.extensions) {
         var pos = RoomPosition.unpack(ext.extensions[i]);
-        var struct = pos.look_for_structure(STRUCTURE_EXTENSION);
-        if(!struct) {
+        if(!pos.look_for_structure(STRUCTURE_EXTENSION)) {
             var style = {};
             visual.text("🏠", pos, style) // house emoji.
         }
@@ -30,19 +31,17 @@ module.exports.run = function(room) {
 
     for(var i in ext.spawns) {
         var pos = RoomPosition.unpack(ext.spawns[i]);
-        var struct = pos.look_for_structure(STRUCTURE_SPAWN);
-        if(!struct) {
+        if(!pos.look_for_structure(STRUCTURE_SPAWN)) {
             var style = {};
             visual.text("🏭", pos, style) // factory emoji.
         }
     }
 
-    if(ext.path) {
-        var style = {
-            lineStyle: "dotted"
-        };
-
-        room.visualise_path(ext.path, style);
+    for(var i in ext.roads) {
+        var pos = RoomPosition.unpack(ext.roads[i]);
+        if(!pos.look_for_structure(STRUCTURE_ROAD)) {
+            visual.circle(pos);
+        }
     }
 }
 
@@ -98,6 +97,7 @@ var try_sixbox = function(room) {
 
         var proposed_extensions = [];
         var proposed_spawns = [];
+        var proposed_roads = [];
 
         var good = true;
         for(var key in sixbox) {
@@ -113,9 +113,11 @@ var try_sixbox = function(room) {
             }
 
             if(stype == STRUCTURE_EXTENSION) {
-                proposed_extensions.push(translated)
+                proposed_extensions.push(translated);
             } else if(stype == STRUCTURE_SPAWN) {
-                proposed_spawns.push(translated)
+                proposed_spawns.push(translated);
+            } else if(stype == STRUCTURE_ROAD) {
+                proposed_roads.push(translated);
             }
         }
 
@@ -124,6 +126,7 @@ var try_sixbox = function(room) {
 
             ext.extensions = proposed_extensions;
             ext.spawns = proposed_spawns;
+            ext.roads = proposed_roads;
             return true;
         }
     }
