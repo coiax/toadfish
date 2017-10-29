@@ -15,5 +15,14 @@ Room.prototype.visualise_path = function(path, style) {
 
         this.visual.line(first.x, first.y, second.x, second.y, style);
     }
+};
 
-}
+Room.prototype.all_positions = function() {
+    var positions = [];
+    for(var i=0; i<50; i++) {
+        for(var j=0; j<50; j++) {
+            positions.push(this.getPositionAt(i,j));
+        }
+    }
+    return positions;
+};
