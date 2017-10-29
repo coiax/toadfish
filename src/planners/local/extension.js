@@ -1,4 +1,7 @@
 module.exports.run = function(room) {
+    if(!(room.controller && room.controller.my))
+        return;
+
     var visual = room.visual;
 
     if(!room.memory.extension)

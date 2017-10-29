@@ -19,10 +19,8 @@ module.exports.run = function() {
 
     for(var name in Game.rooms) {
         var room = Game.rooms[name];
-        if(room.controller && room.controller.my) {
-            for(var j in local_planners)
-                local_planners[j].run(room);
-        }
+        for(var j in local_planners)
+            local_planners[j].run(room);
     }
 
 };

@@ -1,4 +1,7 @@
 module.exports.run = function(room) {
+    if(!(room.controller && room.controller.my))
+        return;
+
     var free_spawns = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_SPAWN, spawning: null}
     });
