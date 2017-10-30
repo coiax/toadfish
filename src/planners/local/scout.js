@@ -29,4 +29,15 @@ module.exports.run = function(room) {
         scout.sources.push(item);
     };
 
+    var minerals = room.find(FIND_MINERALS);
+    for(var i in minerals) {
+        var mineral = minerals[i];
+        scout.mineral = {
+            id: mineral.id,
+            pos: mineral.pos,
+            density: mineral.density,
+            mineralType: mineral.mineralType
+        };
+    }
+
 }
