@@ -10,17 +10,17 @@ module.exports.run = function(room) {
 
     var ext = room.memory.extension;
 
-    // This is where we want them to be placed, in order of construction
-    // priority.
-    if(!ext.proposed)
-        ext.proposed = [];
+    find_best_place(room); // just visualising the exclusion zone atm
 
-    if(!_.isEmpty(ext.proposed)) {
+    if(ext.proposed) {
         visualise_extensions(room, ext.proposed);
         return;
     }
 
-    var possible = try_stamp(room, sixbox);
+    if(!ext.possible) {
+        var possible = try_stamp(room, sixbox);
+        ext.possible = possible;
+    }
 }
 
 var visualise_extensions = function(room, proposed) {
@@ -137,4 +137,23 @@ var find_best_place = function(room, possible) {
 
     // first, generate our "exclusion zone" of positions within 3 of
     // any controller, source or mineral
+    var exclusion_zone = room.controller.pos.get_nearby_positions(3);
+
+    var things = room.find(FIND_SOURCES);
+    things = things.concat(room.find(FIND_MINERALS));
+
+    for(var i in things) {
+        var thing = things[i];
+        var zone = thing.pos.get_nearby_positions(3);
+        exclusion_zone = exclusion_zone.concat(zone);
+    }
+
+    exclusion_zone = _.uniq(exclusion_zone, function(pos) {
+        return pos.stringify();
+    });
+
+    for(var i in exclusion_zone) {
+        var pos = exclusion_zone[i];
+        room.visual.circle(pos, {fill: "red"});
+    }
 }

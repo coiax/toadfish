@@ -18,6 +18,10 @@ RoomPosition.prototype.pack = function() {
     }
 };
 
+RoomPosition.prototype.stringify = function() {
+    return "" + this.x + "," + this.y + "," + this.roomName;
+};
+
 RoomPosition.unpack = function(packed) {
     return new RoomPosition(packed.x, packed.y, packed.roomName);
 };
@@ -78,15 +82,20 @@ RoomPosition.prototype.all_positions = function() {
     return positions;
 };
 
-RoomPosition.get_nearby_positions = function(range) {
-    // TODO this function can likely be optimised.
+RoomPosition.prototype.get_nearby_positions = function(range) {
     var nearby = [];
-    var all_positions = this.all_positions();
-    for(var i in all_positions) {
-        var other = all_positions[i];
-        if(this.inRangeTo(other, range))
-            nearby.push(other);
+
+    for(var dx = -range; dx < range + 1; dx++) {
+        for(var dy = -range; dy < range + 1; dy++) {
+            var x = this.x + dx;
+            var y = this.y + dy;
+            if(x < 0 || x > 49 || y < 0 || y > 49)
+                continue;
+
+            nearby.push(new RoomPosition(x, y, this.roomName));
+        }
     }
+
     return nearby;
 
 };
