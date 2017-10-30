@@ -11,7 +11,7 @@ var extension = require("planners_local_extension");
 
 // Selected planners to run
 var global_planners = [room_counter];
-var local_planners = [family_planner, scout, extension];
+var local_planners = [family_planner, scout];
 
 module.exports.run = function() {
     for(var i in global_planners)

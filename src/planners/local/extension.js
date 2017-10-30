@@ -1,8 +1,9 @@
+var extension_text = "🏠";
+var spawn_text = "🏭";
+
 module.exports.run = function(room) {
     if(!(room.controller && room.controller.my))
         return;
-
-    var visual = room.visual;
 
     if(!room.memory.extension)
         room.memory.extension = {};
@@ -11,36 +12,34 @@ module.exports.run = function(room) {
 
     // This is where we want them to be placed, in order of construction
     // priority.
-    if(!ext.extensions)
-        ext.extensions = [];
-    if(!ext.spawns)
-        ext.spawns = [];
-    if(!ext.roads)
-        ext.roads = [];
+    if(!ext.proposed)
+        ext.proposed = [];
 
-    if(_.isEmpty(ext.extensions))
-        try_sixbox(room);
-
-    for(var i in ext.extensions) {
-        var pos = RoomPosition.unpack(ext.extensions[i]);
-        if(!pos.look_for_structure(STRUCTURE_EXTENSION)) {
-            var style = {};
-            visual.text("🏠", pos, style) // house emoji.
-        }
+    if(!_.isEmpty(ext.proposed)) {
+        visualise_extensions(room, ext.proposed);
+        return;
     }
 
-    for(var i in ext.spawns) {
-        var pos = RoomPosition.unpack(ext.spawns[i]);
-        if(!pos.look_for_structure(STRUCTURE_SPAWN)) {
-            var style = {};
-            visual.text("🏭", pos, style) // factory emoji.
-        }
-    }
+    var possible = try_stamp(room, sixbox);
+}
 
-    for(var i in ext.roads) {
-        var pos = RoomPosition.unpack(ext.roads[i]);
-        if(!pos.look_for_structure(STRUCTURE_ROAD)) {
-            visual.circle(pos);
+var visualise_extensions = function(room, proposed) {
+    var visual = room.visual;
+
+    for(var i in proposed) {
+        var item = proposed[i];
+
+        var pos = item.pos;
+        var stype = item.structureType;
+
+        if(!pos.look_for_structure(stype)) {
+            if(stype == STRUCTURE_EXTENSION) {
+                visual.text(extension_text, pos);
+            } else if(stype == STRUCTURE_SPAWN) {
+                visual.text(spawn_text, pos);
+            } else if(Stype == STRUCTURE_ROAD) {
+                visual.circle(pos);
+            }
         }
     }
 }
@@ -89,19 +88,18 @@ var sixbox = strings_to_planning_map([
     "      #      "
 ]);
 
-var try_sixbox = function(room) {
-    // Attempt to make a sixbox spawn plan.
+var try_stamp = function(room, stamp) {
+    // Attempt to make a spawn plan for the given room.
     var positions = room.all_positions();
+    var possible = [];
     for(var i in positions) {
         var pos = positions[i];
 
-        var proposed_extensions = [];
-        var proposed_spawns = [];
-        var proposed_roads = [];
+        var proposed = [];
 
         var good = true;
-        for(var key in sixbox) {
-            var stype = sixbox[key];
+        for(var key in stamp) {
+            var stype = stamp[key];
 
             var y = Math.floor(key / 50);
             var x = key % 50;
@@ -112,24 +110,31 @@ var try_sixbox = function(room) {
                 break;
             }
 
-            if(stype == STRUCTURE_EXTENSION) {
-                proposed_extensions.push(translated);
-            } else if(stype == STRUCTURE_SPAWN) {
-                proposed_spawns.push(translated);
-            } else if(stype == STRUCTURE_ROAD) {
-                proposed_roads.push(translated);
-            }
+            proposed.push({
+                structureType: stype,
+                pos: translated
+            });
         }
 
         if(good) {
-            var ext = room.memory.extension;
+            var obj = {
+                proposed: proposed,
+                pos: pos
+            }
 
-            ext.extensions = proposed_extensions;
-            ext.spawns = proposed_spawns;
-            ext.roads = proposed_roads;
-            return true;
+            possible.push(obj);
         }
     }
 
-    return false;
+    return possible;
+}
+
+var find_best_place = function(room, possible) {
+    // possible is a series of viable "stamps" that can be placed in the room
+    // we want to find the "best" place to put it.
+    // - as far as possible from any exits to the room
+    // - not within 3 tiles of any controller, source or mineral
+
+    // first, generate our "exclusion zone" of positions within 3 of
+    // any controller, source or mineral
 }

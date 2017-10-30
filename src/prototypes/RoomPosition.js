@@ -43,7 +43,7 @@ RoomPosition.prototype.has_planning_obstruction = function(stype) {
     if(this.is_wall())
         return true;
 
-    if(this.x == 0 || this.x == 49 || this.y == 0 || this.y == 49)
+    if(this.x <= 0 || this.x >= 49 || this.y <= 0 || this.y >= 49)
         return true;
 
     var stuff = this.lookFor(LOOK_CONSTRUCTION_SITES);
@@ -64,4 +64,29 @@ RoomPosition.prototype.has_planning_obstruction = function(stype) {
 
 RoomPosition.prototype.translate = function(x, y) {
     return new RoomPosition(this.x + x, this.y + y, this.roomName);
+};
+
+
+RoomPosition.prototype.all_positions = function() {
+    // why yes, this looks similar to the Room.all_positions function
+    var positions = [];
+    for(var i=0; i<50; i++) {
+        for(var j=0; j<50; j++) {
+            positions.push(new RoomPosition(i, j, this.roomName));
+        }
+    }
+    return positions;
+};
+
+RoomPosition.get_nearby_positions = function(range) {
+    // TODO this function can likely be optimised.
+    var nearby = [];
+    var all_positions = this.all_positions();
+    for(var i in all_positions) {
+        var other = all_positions[i];
+        if(this.inRangeTo(other, range))
+            nearby.push(other);
+    }
+    return nearby;
+
 };
