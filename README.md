@@ -1,6 +1,12 @@
 # toadfish
 
 
+## Long term design goals
+* Extension planning
+* Creep spawning and optimisation
+* Remote mining
+* Energy allocation and budgeting
+* Fortification placement
 
 ## Required creep tasks:
 * Harvest energy
