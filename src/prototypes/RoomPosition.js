@@ -22,6 +22,17 @@ RoomPosition.prototype.stringify = function() {
     return "" + this.x + "," + this.y + "," + this.roomName;
 };
 
+RoomPosition.prototype.index = function() {
+    return 50*y + x;
+}
+
+RoomPosition.unindex = function(index, roomName="none") {
+    var y = Math.floor(index / 50);
+    var x = index % 50;
+
+    return new RoomPosition(x, y, roomName);
+}
+
 RoomPosition.unpack = function(packed) {
     return new RoomPosition(packed.x, packed.y, packed.roomName);
 };

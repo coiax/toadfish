@@ -101,10 +101,9 @@ var try_stamp = function(room, stamp) {
         for(var key in stamp) {
             var stype = stamp[key];
 
-            var y = Math.floor(key / 50);
-            var x = key % 50;
+            var dpos = RoomPosition.unindex(key, pos.roomName);
 
-            var translated = pos.translate(x, y);
+            var translated = pos.translate(dpos.x, dpos.y);
             if(translated.has_planning_obstruction(stype)) {
                 good = false;
                 break;
