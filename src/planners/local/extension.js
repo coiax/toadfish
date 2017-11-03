@@ -151,8 +151,11 @@ var find_best_place = function(room, possible) {
         return pos.stringify();
     });
 
+    /*
+    // visualise the exclusion zone as red dots
     for(var i in exclusion_zone) {
         var pos = exclusion_zone[i];
         room.visual.circle(pos, {fill: "red"});
     }
+   */
 }

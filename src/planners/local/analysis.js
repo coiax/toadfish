@@ -6,9 +6,9 @@ module.exports.run = function(room) {
     // Each tick that we own a room, perform expensive analysis,
     // storing the results in memory.
 
-    var budget = 1;
+    var budget = 3;
 
-    while(budget >= 0) {
+    while(budget > 0) {
         var result = closest_exit_path_distance(room)
         if(result) {
             budget--;
@@ -17,20 +17,36 @@ module.exports.run = function(room) {
         break;
     }
 
-    //room.display_value_array(room.memory.exit_distance);
-    room.visualise_value_array(room.memory.exit_distance);
+    room.visualise_value_array_as_text(room.memory.exit_distance.values);
+    //room.visualise_value_array_as_greyscale(room.memory.exit_distance);
 
 }
 
 var closest_exit_path_distance = function(room) {
+    // TODO this entire process is likely duplicating pathfinding
+    // operations that can be easily reused in some sort of single
+    // revelation burst?
+
     // Assuming that no creeps or structures are present, determine the
     // shortest distance to an exit.
-    if(!room.memory.exit_distance)
-        room.memory.exit_distance = [];
+    if(!room.memory.exit_distance) {
+        room.memory.exit_distance = {
+            values: [],
+            complete: false
+        };
+    }
 
     var exit_distance = room.memory.exit_distance;
-    if(exit_distance.length >= 50*50)
+
+    if(!exit_distance.values)
+        exit_distance.values = [];
+
+    var values = exit_distance.values;
+
+    if(values.length >= 50*50) {
+        exit_distance.complete = true;
         return false;
+    }
 
     var exits = room.all_exits();
 
@@ -38,7 +54,7 @@ var closest_exit_path_distance = function(room) {
         return false;
 
     // Find next point to calculate.
-    var pos = RoomPosition.unindex(exit_distance.length, room.name);
+    var pos = RoomPosition.unindex(values.length, room.name);
 
     var value = null;
     if(pos.is_wall()) { 
@@ -59,7 +75,7 @@ var closest_exit_path_distance = function(room) {
         value = closest;
     }
 
-    exit_distance.push(value);
+    values.push(value);
     return true;
 
 }

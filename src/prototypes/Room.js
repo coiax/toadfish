@@ -44,7 +44,10 @@ Room.prototype.all_exits = function() {
     return exits;
 };
 
-Room.prototype.display_value_array = function(arr) {
+Room.prototype.visualise_value_array_as_text = function(arr) {
+
+    // given a position array of values, display them on the position
+    // they correspond to, not displaying any values of null
     for(var i in arr) {
         var value = arr[i];
         if(value === null)
@@ -56,7 +59,7 @@ Room.prototype.display_value_array = function(arr) {
     }
 }
 
-Room.prototype.visualise_value_array = function(arr) {
+Room.prototype.visualise_value_array_as_greyscale = function(arr) {
     var visual = this.visual;
     // given an array of up to 2500 points, paint squares/circles on the
     // room, varying in colours based on the min and maximum of that array
