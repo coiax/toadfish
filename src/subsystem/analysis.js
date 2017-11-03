@@ -1,8 +1,9 @@
-module.exports.name = "analysis";
-module.exports.run = function(room) {
-    if(!room.controller || !room.controller.my)
-        return;
+var constants = require("constants");
 
+module.exports.name = "analysis";
+module.exports.mode = constants.PER_OWNED_ROOM;
+module.exports.enabled = true;
+module.exports.run = function(room) {
     // Each tick that we own a room, perform expensive analysis,
     // storing the results in memory.
 

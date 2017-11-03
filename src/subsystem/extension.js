@@ -1,10 +1,12 @@
+var constants = require("constants");
+
 var extension_text = "🏠";
 var spawn_text = "🏭";
 
+module.exports.name = "extension";
+module.exports.mode = constants.PER_OWNED_ROOM;
+module.exports.enabled = true;
 module.exports.run = function(room) {
-    if(!(room.controller && room.controller.my))
-        return;
-
     if(!room.memory.extension)
         room.memory.extension = {};
 

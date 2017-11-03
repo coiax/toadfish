@@ -1,7 +1,9 @@
-module.exports.run = function(room) {
-    if(!(room.controller && room.controller.my))
-        return;
+var constants = require("constants");
 
+module.exports.name = "family_planner";
+module.exports.mode = constants.PER_OWNED_ROOM;
+module.exports.enabled = true;
+module.exports.run = function(room) {
     var free_spawns = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_SPAWN, spawning: null}
     });

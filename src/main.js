@@ -1,18 +1,8 @@
 require("all_prototypes");
-var role_manager = require("role_manager");
-var master_planner = require("planners_master");
-var gc = require("gc");
+
+var master_controller = require("master_controller");
 
 module.exports.loop = function() {
-    gc.gc();
-
-    master_planner.run();
-
-    for(var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if(creep.spawning)
-            continue;
-        role_manager.run(creep);
-        creep.visualise_path();
-    }
+    // wow, we are doing so much here
+    master_controller.run();
 }
