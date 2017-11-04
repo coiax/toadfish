@@ -3,15 +3,18 @@ module.exports.run = function(creep) {
     // if no energy, get energy.
     var target = Game.getObjectById(creep.memory.target_id);
     // if no target, then the planners messed up.
+    if(!target) {
+        creep.memory.idle = true;
+        return;
+    }
 
-    var mode = creep.memory.build_mode;
     var rc;
-    if(mode == "build") {
+    if(target.progressTotal) {
         rc = creep.build(target);
-    } else if(mode == "repair") {
+    } else if(target.hitsMax) {
         rc = creep.repair(target);
     } else {
-        console.log(creep.name + " - bad builder mode - " + mode);
+        console.log(creep.name + " - bad builder target - " + target);
         return;
     }
 
