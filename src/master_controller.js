@@ -1,9 +1,25 @@
 var constants = require("constants");
 
-var subsystems = {};
-var nameless_id = 1;
+function MC() {
+    this.subsystems = {};
+    this.active_subsystems = {};
+    this.nameless_id = 1;
+    this.load_all();
+}
 
-var load_subsystem = function(module) {
+
+MC.prototype.load_all = function() {
+    this.load_subsystem(require("subsystem_analysis"));
+    this.load_subsystem(require("subsystem_extension"));
+    this.load_subsystem(require("subsystem_family_planner"));
+    this.load_subsystem(require("subsystem_gc"));
+    this.load_subsystem(require("subsystem_role_manager"));
+    this.load_subsystem(require("subsystem_room_counter"));
+    this.load_subsystem(require("subsystem_scout"));
+};
+
+
+MC.prototype.load_subsystem = function(module) {
     if(!module.name) {
         module.name = "nameless_subsystem_" + nameless_id;
         nameless_id++;
@@ -16,18 +32,13 @@ var load_subsystem = function(module) {
         return;
     }
 
-    subsystems[module.name] = module;
+    this.subsystems[module.name] = module;
+    if(module.starts_active)
+        this.active_subsystems[module.name] = module;
 };
 
-load_subsystem(require("subsystem_analysis"));
-load_subsystem(require("subsystem_extension"));
-load_subsystem(require("subsystem_family_planner"));
-load_subsystem(require("subsystem_gc"));
-load_subsystem(require("subsystem_role_manager"));
-load_subsystem(require("subsystem_room_counter"));
-load_subsystem(require("subsystem_scout"));
 
-var run_subsystem = function(subsystem) {
+MC.prototype.run_subsystem = function(subsystem) {
     if(subsystem.mode == constants.PER_TICK) {
         subsystem.run();
     } else if(subsystem.mode == constants.PER_ROOM
@@ -44,11 +55,20 @@ var run_subsystem = function(subsystem) {
     }
 }
 
-module.exports.run = function() {
-    // TODO Find the next SS that is active and has the lowest "order" no.
-    for(var i in subsystems) {
-        var subsystem = subsystems[i];
-        if(subsystem.starts_enabled)
-            run_subsystem(subsystem);
+MC.prototype.run = function() {
+    // Find the next SS that is active and has the lowest "order" no.
+    while(!_.isEmpty(this.active_subsystems)) {
+        var lowest_subsystem = null;
+
+        for(var name in this.active_subsystems) {
+            var subsystem = this.active_subsystems[name];
+            if(!lowest_subsystem || subsystem.order < lowest_subsystem.order)
+                lowest_subsystem = subsystem;
+        }
+
+        this.run_subsystem(lowest_subsystem);
+        delete this.active_subsystems[lowest_subsystem.name];
     }
 };
+
+module.exports = MC;

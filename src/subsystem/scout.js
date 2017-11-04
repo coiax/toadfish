@@ -2,7 +2,7 @@ var constants = require("constants");
 
 module.exports.name = "scout";
 module.exports.mode = constants.PER_ROOM;
-module.exports.starts_enabled = true;
+module.exports.starts_active = true;
 module.exports.run = function(room) {
     // Store information for future consideration about expansion/attack
     room.memory.scout = {};

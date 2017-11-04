@@ -2,7 +2,7 @@ var constants = require("constants");
 
 module.exports.name = "room_counter";
 module.exports.mode = constants.PER_TICK;
-module.exports.starts_enabled = true;
+module.exports.starts_active = true;
 
 module.exports.run = function() {
     var count = 0;

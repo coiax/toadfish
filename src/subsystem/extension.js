@@ -6,7 +6,7 @@ var spawn_text = "🏭";
 
 module.exports.name = "extension";
 module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.starts_enabled = true;
+module.exports.starts_active = true;
 module.exports.run = function(room) {
     if(!room.memory.extension)
         room.memory.extension = {};
