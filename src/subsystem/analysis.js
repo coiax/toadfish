@@ -18,7 +18,7 @@ module.exports.run = function(room) {
         break;
     }
 
-    room.visualise_value_array_as_text(room.memory.exit_distance.values);
+    //room.visualise_value_array_as_text(room.memory.exit_distance.values);
     //room.visualise_value_array_as_greyscale(room.memory.exit_distance);
 
 }

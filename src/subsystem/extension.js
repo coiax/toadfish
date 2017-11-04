@@ -1,4 +1,5 @@
 var constants = require("constants");
+var util_position = require("util_position");
 
 var extension_text = "🏠";
 var spawn_text = "🏭";
@@ -12,17 +13,15 @@ module.exports.run = function(room) {
 
     var ext = room.memory.extension;
 
-    find_best_place(room); // just visualising the exclusion zone atm
-
-    if(ext.proposed) {
-        visualise_extensions(room, ext.proposed);
+    if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
         return;
+
+
+    if(!ext.proposed) {
+        find_best_place(room);
     }
 
-    if(!ext.possible) {
-        var possible = try_stamp(room, sixbox);
-        ext.possible = possible;
-    }
+    visualise_extensions(room, ext.proposed);
 }
 
 var visualise_extensions = function(room, proposed) {
@@ -31,22 +30,25 @@ var visualise_extensions = function(room, proposed) {
     for(var i in proposed) {
         var item = proposed[i];
 
-        var pos = item.pos;
+        var pos = RoomPosition.unpack(item.pos);
         var stype = item.structureType;
+
+        if(!pos || !stype)
+            continue;
 
         if(!pos.look_for_structure(stype)) {
             if(stype == STRUCTURE_EXTENSION) {
                 visual.text(extension_text, pos);
             } else if(stype == STRUCTURE_SPAWN) {
                 visual.text(spawn_text, pos);
-            } else if(Stype == STRUCTURE_ROAD) {
+            } else if(stype == STRUCTURE_ROAD) {
                 visual.circle(pos);
             }
         }
     }
 }
 
-var strings_to_planning_map = function(arr) {
+var strings_to_stamp = function(arr) {
     var map = {};
 
     for(var y in arr) {
@@ -75,7 +77,7 @@ var strings_to_planning_map = function(arr) {
     return map;
 }
 
-var sixbox = strings_to_planning_map([
+var sixbox = strings_to_stamp([
     "      S      ",
     "    oo#oo    ",
     "   oo# #oo   ",
@@ -90,7 +92,14 @@ var sixbox = strings_to_planning_map([
     "      #      "
 ]);
 
-var try_stamp = function(room, stamp) {
+var try_stamp = function(room, stamp, opts) {
+    if(!opts)
+        opts = {};
+
+    var excluded = [];
+    if(opts.excluded)
+        excluded = util_position.stringify_list(opts.excluded);
+
     // Attempt to make a spawn plan for the given room.
     var positions = room.all_positions();
     var possible = [];
@@ -110,6 +119,10 @@ var try_stamp = function(room, stamp) {
                 good = false;
                 break;
             }
+            if(excluded.includes(translated.stringify())) {
+                good = false;
+                break;
+            }
 
             proposed.push({
                 structureType: stype,
@@ -118,12 +131,7 @@ var try_stamp = function(room, stamp) {
         }
 
         if(good) {
-            var obj = {
-                proposed: proposed,
-                pos: pos
-            }
-
-            possible.push(obj);
+            possible.push(proposed);
         }
     }
 
@@ -138,9 +146,10 @@ var find_best_place = function(room, possible) {
 
     // first, generate our "exclusion zone" of positions within 3 of
     // any controller, source or mineral
-    var exclusion_zone = room.controller.pos.get_nearby_positions(3);
+    var exclusion_zone = [];
 
-    var things = room.find(FIND_SOURCES);
+    var things = [room.controller];
+    things = things.concat(room.find(FIND_SOURCES));
     things = things.concat(room.find(FIND_MINERALS));
 
     for(var i in things) {
@@ -153,11 +162,29 @@ var find_best_place = function(room, possible) {
         return pos.stringify();
     });
 
-    /*
-    // visualise the exclusion zone as red dots
-    for(var i in exclusion_zone) {
-        var pos = exclusion_zone[i];
-        room.visual.circle(pos, {fill: "red"});
+    var possible = try_stamp(room, sixbox, {
+        excluded: exclusion_zone
+    });
+
+    var values = room.memory.exit_distance.values;
+
+    var best_placement = null;
+    var best_score = -Infinity;
+
+    // Now rank the possible places.
+    for(var i in possible) {
+        var proposed = possible[i];
+        var score = 0;
+        // calculate score.
+        for(var j in proposed) {
+            var pos = proposed[j].pos;
+            score += values[pos.index()];
+        }
+        if(score > best_score) {
+            best_score = score;
+            best_placement = proposed;
+        }
     }
-   */
+
+    room.memory.extension.proposed = best_placement;
 }

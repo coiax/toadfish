@@ -23,7 +23,7 @@ RoomPosition.prototype.stringify = function() {
 };
 
 RoomPosition.prototype.index = function() {
-    return 50*y + x;
+    return 50*this.y + this.x;
 }
 
 RoomPosition.unindex = function(index, roomName="none") {
