@@ -157,3 +157,31 @@ Room.prototype.findMyStructures = function(stype, opts) {
     return this.find(FIND_MY_STRUCTURES, opts);
 }
 
+Room.prototype.find_containers_with_energy = function() {
+    return this.find(FIND_STRUCTURES, {
+        filter: function(struct) {
+            if(struct.structureType == STRUCTURE_CONTAINER) {
+                if(struct.store[RESOURCE_ENERGY] > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    });
+}
+
+Room.prototype.find_loose_energy = function() {
+    return this.find(FIND_DROPPED_RESOURCES, {
+        filter: { resourceType: RESOURCE_ENERGY }
+    });
+}
+
+Room.prototype.find_active_sources = function() {
+    return this.find(FIND_SOURCES, {
+        filter: function(src) {
+            if(src.energy > 0)
+                return true;
+            return false;
+        }
+    });
+}

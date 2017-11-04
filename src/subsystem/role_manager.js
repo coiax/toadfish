@@ -8,7 +8,8 @@ var register = function(role_module) {
 
 register(require("roles_tutorial_upgrader"));
 register(require("roles_cow"));
-register(require("roles_builder"));
+register(require("roles_worker"));
+register(require("roles_refill"));
 
 module.exports.name = "role_manager";
 module.exports.mode = C.PER_TICK;
@@ -24,8 +25,11 @@ module.exports.run = function(creep) {
 
         var module = registered[creep.memory.role];
 
-        if(!((module === null) || (module === undefined)))
+        if(!((module === null) || (module === undefined))) {
             module.run(creep);
+        } else {
+            console.log("No such role as: " + creep.memory.role);
+        }
 
         creep.visualise_path();
     }

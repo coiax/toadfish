@@ -4,11 +4,11 @@ module.exports.name = "family_planner";
 module.exports.mode = constants.PER_OWNED_ROOM;
 module.exports.starts_enabled = true;
 module.exports.run = function(room) {
-    // Mark spawn age.
     var spawns = room.findMyStructures(STRUCTURE_SPAWN);
 
     for(var i in spawns) {
         var spawn = spawns[i];
+        // Mark spawn age.
         if(!spawn.memory.built_on)
             spawn.memory.built_on = Game.time;
     }
@@ -31,10 +31,10 @@ module.exports.run = function(room) {
         wanted_children.push({
             body: [WORK, CARRY, MOVE], 
             memory: {
-                role: "tutorial_upgrader"
+                role: "tutorial_upgrader",
+                home_room: room.name
             }
         });
-
     }
 
     while(!_.isEmpty(free_spawns) && !_.isEmpty(wanted_children)) {
