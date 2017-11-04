@@ -6,7 +6,7 @@ var spawn_text = "🏭";
 
 module.exports.name = "extension";
 module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.starts_active = true;
+module.exports.starts_active = false;
 module.exports.run = function(room) {
     if(!room.memory.extension)
         room.memory.extension = {};
@@ -20,6 +20,8 @@ module.exports.run = function(room) {
     if(!ext.proposed) {
         find_best_place(room);
     }
+    if(!ext.proposed)
+        return;
 
     visualise_extensions(room, ext.proposed);
 
@@ -213,34 +215,38 @@ var try_stamp = function(room, stamp, opts) {
     return possible;
 }
 
-var find_best_place = function(room, possible) {
-    // possible is a series of viable "stamps" that can be placed in the room
-    // we want to find the "best" place to put it.
+var find_best_place = function(room) {
+    // we want to find the "best" place to put our stamps
     // - as far as possible from any exits to the room
     // - not within 3 tiles of any controller, source or mineral
 
-    // first, generate our "exclusion zone" of positions within 3 of
-    // any controller, source or mineral
-    var exclusion_zone = [];
+    if(!room.memory.extension.possible) {
+        // first, generate our "exclusion zone" of positions within 3 of
+        // any controller, source or mineral
+        var exclusion_zone = [];
 
-    var things = [room.controller];
-    things = things.concat(room.find(FIND_SOURCES));
-    things = things.concat(room.find(FIND_MINERALS));
+        var things = [room.controller];
+        things = things.concat(room.find(FIND_SOURCES));
+        things = things.concat(room.find(FIND_MINERALS));
 
-    for(var i in things) {
-        var thing = things[i];
-        var zone = thing.pos.get_nearby_positions(3);
-        exclusion_zone = exclusion_zone.concat(zone);
+        for(var i in things) {
+            var thing = things[i];
+            var zone = thing.pos.get_nearby_positions(3);
+            exclusion_zone = exclusion_zone.concat(zone);
+        }
+
+        exclusion_zone = _.uniq(exclusion_zone, function(pos) {
+            return pos.stringify();
+        });
+
+        var possible = try_stamp(room, sixbox, {
+            excluded: exclusion_zone
+        });
+
+        room.memory.extension.possible = possible;
     }
 
-    exclusion_zone = _.uniq(exclusion_zone, function(pos) {
-        return pos.stringify();
-    });
-
-    var possible = try_stamp(room, sixbox, {
-        excluded: exclusion_zone
-    });
-
+    var possible = room.memory.extension.possible;
     var values = room.memory.exit_distance.values;
 
     var best_placement = null;
@@ -258,6 +264,9 @@ var find_best_place = function(room, possible) {
         if(score > best_score) {
             best_score = score;
             best_placement = proposed;
+        } else {
+            possible.split(i, 1)
+            return;
         }
     }
 
