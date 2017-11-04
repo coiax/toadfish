@@ -2,7 +2,7 @@ var constants = require("constants");
 
 module.exports.name = "family_planner";
 module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.enabled = true;
+module.exports.starts_enabled = true;
 module.exports.run = function(room) {
     // Mark spawn age.
     var spawns = room.findMyStructures(STRUCTURE_SPAWN);

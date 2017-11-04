@@ -2,7 +2,7 @@ var constants = require("constants");
 
 module.exports.name = "analysis";
 module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.enabled = true;
+module.exports.starts_enabled = true;
 module.exports.run = function(room) {
     // Each tick that we own a room, perform expensive analysis,
     // storing the results in memory.

@@ -1,22 +1,19 @@
 var constants = require("constants");
 
 var subsystems = {};
+var nameless_id = 1;
 
 var load_subsystem = function(module) {
     if(!module.name) {
-        console.log("Module " + module.filename + " is missing name.");
-        return;
+        module.name = "nameless_subsystem_" + nameless_id;
+        nameless_id++;
     }
     if(!module.order)
         module.order = constants.DEFAULT_SUBSYSTEM_ORDER;
 
     if(!module.mode) {
-        console.log("Module " + name + " is missing mode.");
+        console.log("Module " + module.name + " is missing mode.");
         return;
-    }
-
-    if(!module.enabled) {
-        module.enabled = false;
     }
 
     subsystems[module.name] = module;
@@ -51,7 +48,7 @@ module.exports.run = function() {
     // TODO Find the next SS that is active and has the lowest "order" no.
     for(var i in subsystems) {
         var subsystem = subsystems[i];
-        if(subsystem.enabled)
-            run_subsystem(subsystem); 
+        if(subsystem.starts_enabled)
+            run_subsystem(subsystem);
     }
 };

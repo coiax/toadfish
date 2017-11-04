@@ -1,8 +1,8 @@
 var constants = require("constants");
 
-module.name = "room_counter";
-module.mode = constants.PER_TICK;
-module.enabled = true;
+module.exports.name = "room_counter";
+module.exports.mode = constants.PER_TICK;
+module.exports.starts_enabled = true;
 
 module.exports.run = function() {
     var count = 0;

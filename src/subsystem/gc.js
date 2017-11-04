@@ -3,7 +3,7 @@ var C = require("constants");
 module.exports.name = "garbarge_collector";
 module.exports.mode = C.PER_TICK;
 module.exports.order = C.GARBARGE_COLLECTOR_ORDER;
-module.exports.enabled = true;
+module.exports.starts_enabled = true;
 
 module.exports.run = function() {
     var maintained = [

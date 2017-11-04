@@ -13,7 +13,7 @@ register(require("roles_builder"));
 module.exports.name = "role_manager";
 module.exports.mode = C.PER_TICK;
 module.exports.order = C.ROLE_MANAGER_ORDER;
-module.exports.enabled = true;
+module.exports.starts_enabled = true;
 
 module.exports.run = function(creep) {
     for(var name in Game.creeps) {
