@@ -37,14 +37,22 @@ RoomPosition.unpack = function(packed) {
     return new RoomPosition(packed.x, packed.y, packed.roomName);
 };
 
-RoomPosition.prototype.look_for_structure = function(stype) {
-    var structures = this.lookFor(LOOK_STRUCTURES);
-    for(var i in structures) {
-        var struct = structures[i];
-        if(struct.structureType == stype)
-            return struct;
+RoomPosition.prototype.look_for_X = function(X, stype) {
+    var things = this.lookFor(X);
+    for(var i in things) {
+        var thing = things[i];
+        if(thing.structureType == stype)
+            return thing;
     }
     return null;
+};
+
+RoomPosition.prototype.look_for_site = function(stype) {
+    return this.look_for_X(LOOK_CONSTRUCTION_SITES, stype);
+};
+
+RoomPosition.prototype.look_for_structure = function(stype) {
+    return this.look_for_X(LOOK_STRUCTURES, stype);
 };
 
 RoomPosition.prototype.has_planning_obstruction = function(stype) {

@@ -4,6 +4,15 @@ module.exports.name = "family_planner";
 module.exports.mode = constants.PER_OWNED_ROOM;
 module.exports.enabled = true;
 module.exports.run = function(room) {
+    // Mark spawn age.
+    var spawns = room.findMyStructures(STRUCTURE_SPAWN);
+
+    for(var i in spawns) {
+        var spawn = spawns[i];
+        if(!spawn.memory.built_on)
+            spawn.memory.built_on = Game.time;
+    }
+
     var free_spawns = room.find(FIND_MY_STRUCTURES, {
         filter: { structureType: STRUCTURE_SPAWN, spawning: null}
     });

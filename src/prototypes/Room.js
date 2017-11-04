@@ -88,3 +88,72 @@ Room.prototype.visualise_value_array_as_greyscale = function(arr) {
         });
     }
 }
+
+Room.prototype.count_structures = function(include_construction_sites=true) {
+    var structures = this.find(FIND_STRUCTURES);
+
+    if(include_construction_sites)
+        structures = structures.concat(this.find(FIND_CONSTRUCTION_SITES));
+
+    var amounts = {};
+    for(var i in structures) {
+        var str = structures[i];
+        if(amounts[str.structureType]) {
+            amounts[str.structureType]++;
+        } else {
+            amounts[str.structureType] = 1;
+        }
+    }
+    return amounts;
+};
+
+Room.prototype.allowed_structures = function() {
+    var rcl = 0;
+    if(this.controller)
+        rcl = this.controller.level;
+
+    var amounts = {};
+    for(var stype in CONTROLLER_STRUCTURES) {
+        var entry = CONTROLLER_STRUCTURES[stype];
+        amounts[stype] = entry[rcl] || 0;
+    }
+
+    return amounts;
+};
+
+Room.prototype.can_build_structures = function() {
+    // Can produce negative amounts if a controller has been downgraded
+    var allowed_amounts = this.allowed_structures();
+    var current_amounts = this.count_structures();
+
+    var remaining_amounts = {};
+    for(var stype in allowed_amounts) {
+        var allowed = allowed_amounts[stype];
+        var current = current_amounts[stype] || 0;
+        remaining_amounts[stype] = allowed - current;
+    }
+
+    return remaining_amounts;
+};
+
+Room.prototype.findStructures = function(stype, opts) {
+    if(!opts)
+        opts = {};
+    if(!opts.filter)
+        opts.filter = {}
+    opts.filter.structureType = stype;
+
+    return this.find(FIND_STRUCTURES, opts);
+}
+
+Room.prototype.findMyStructures = function(stype, opts) {
+    if(!opts)
+        opts = {};
+    if(!opts.filter)
+        opts.filter = {};
+
+    opts.filter.structureType = stype;
+
+    return this.find(FIND_MY_STRUCTURES, opts);
+}
+

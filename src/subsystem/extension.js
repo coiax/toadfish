@@ -22,7 +22,82 @@ module.exports.run = function(room) {
     }
 
     visualise_extensions(room, ext.proposed);
+
+    // Now we know where we want to build.
+    // 1) can we construct any more?
+    // 2) is there already construction in progress?
+    // 3) place a construction site nearest to existing construction
+    
+    var can_build = room.can_build_structures();
+    var selected_type = null;
+    if(can_build[STRUCTURE_SPAWN] > 0) {
+        selected_type = STRUCTURE_SPAWN;
+    } else if(can_build[STRUCTURE_EXTENSION] > 0) {
+        selected_type = STRUCTURE_EXTENSION;
+    } else if(can_build[STRUCTURE_ROAD] > 0) {
+        selected_type = STRUCTURE_ROAD;
+    }
+
+    if(!selected_type)
+        return;
+
+    // build the potential sites closest to the first constructed spawn,
+    // or to the controller if there is no spawn.
+    // Call this point the "landmark".
+    var landmark = find_landmark(room);
+    var closest_unbuilt = null;
+    var closest_distance = Infinity;
+
+    for(var i in ext.proposed) {
+        var item = ext.proposed[i];
+ 
+        var pos = RoomPosition.unpack(item.pos);
+        var stype = item.structureType;
+        if(stype != selected_type)
+            continue;
+
+        if(pos.look_for_structure(stype))
+            continue;
+
+        var distance = pos.getRangeTo(landmark);
+        if(distance < closest_distance) {
+            closest_distance = distance;
+            closest_unbuilt = pos;
+            //console.log(pos.stringify() + "," + distance);
+        }
+    }
+
+    if(closest_unbuilt) {
+        room.visual.circle(closest_unbuilt, {
+            fill: "#00ff00"
+        });
+    }
+
+    if(!closest_unbuilt.look_for_site(selected_type))
+        room.createConstructionSite(closest_unbuilt, selected_type)
+
 }
+
+var find_landmark = function(room) {
+    var spawns = room.findMyStructures(STRUCTURE_SPAWN);
+    if(_.isEmpty(spawns)) {
+        return room.controller;
+    } else {
+        var earliest_time = Infinity;
+        var earliest_spawn = null;
+
+        for(var i in spawns) {
+            var spawn = spawns[i];
+            var built_on = spawn.memory.built_on;
+            if(built_on < earliest_time) {
+                earliest_time = built_on;
+                earliest_spawn = spawn;
+            }
+        }
+        return earliest_spawn;
+    }
+    
+};
 
 var visualise_extensions = function(room, proposed) {
     var visual = room.visual;
@@ -36,7 +111,7 @@ var visualise_extensions = function(room, proposed) {
         if(!pos || !stype)
             continue;
 
-        if(!pos.look_for_structure(stype)) {
+        if(!pos.look_for_structure(stype) && !pos.look_for_site(stype)) {
             if(stype == STRUCTURE_EXTENSION) {
                 visual.text(extension_text, pos);
             } else if(stype == STRUCTURE_SPAWN) {
