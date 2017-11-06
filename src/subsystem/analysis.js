@@ -1,27 +1,35 @@
 var constants = require("constants");
+var Subsystem = require("subsystem");
 
-module.exports.name = "analysis";
-module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.starts_active = true;
-module.exports.run = function(room) {
-    // Each tick that we own a room, perform expensive analysis,
-    // storing the results in memory.
+class Analysis extends Subsystem {
+    constructor(mc) {
+        super(mc);
 
-    var budget = 3;
-
-    while(budget > 0) {
-        var result = closest_exit_path_distance(room)
-        if(result) {
-            budget--;
-            continue;
-        }
-        break;
+        this.name = "analysis";
+        this.mode = constants.PER_OWNED_ROOM;
     }
 
-    //room.visualise_value_array_as_text(room.memory.exit_distance.values);
-    //room.visualise_value_array_as_greyscale(room.memory.exit_distance);
+    run(room) {
+        // Each tick that we own a room, perform expensive analysis,
+        // storing the results in memory.
 
+        var budget = 3;
+
+        while(budget > 0) {
+            var result = closest_exit_path_distance(room)
+            if(result) {
+                budget--;
+                continue;
+            }
+            break;
+        }
+
+        //room.visualise_value_array_as_text(room.memory.exit_distance.values);
+        //room.visualise_value_array_as_greyscale(room.memory.exit_distance);
+    }
 }
+
+module.exports = Analysis;
 
 var closest_exit_path_distance = function(room) {
     // TODO this entire process is likely duplicating pathfinding
@@ -78,5 +86,4 @@ var closest_exit_path_distance = function(room) {
 
     values.push(value);
     return true;
-
 }

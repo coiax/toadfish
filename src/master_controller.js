@@ -14,27 +14,16 @@ MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_family_planner"));
     this.load_subsystem(require("subsystem_gc"));
     this.load_subsystem(require("subsystem_role_manager"));
-    this.load_subsystem(require("subsystem_room_counter"));
     this.load_subsystem(require("subsystem_scout"));
 };
 
 
-MC.prototype.load_subsystem = function(module) {
-    if(!module.name) {
-        module.name = "nameless_subsystem_" + nameless_id;
-        nameless_id++;
-    }
-    if(!module.order)
-        module.order = constants.DEFAULT_SUBSYSTEM_ORDER;
+MC.prototype.load_subsystem = function(ss_cls) {
+    var subsystem = new ss_cls(this);
 
-    if(!module.mode) {
-        console.log("Module " + module.name + " is missing mode.");
-        return;
-    }
-
-    this.subsystems[module.name] = module;
-    if(module.starts_active)
-        this.active_subsystems[module.name] = module;
+    this.subsystems[subsystem.name] = subsystem;
+    if(subsystem.starts_active)
+        this.active_subsystems[subsystem.name] = subsystem;
 };
 
 

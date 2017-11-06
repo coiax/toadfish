@@ -1,54 +1,66 @@
 var constants = require("constants");
+var Subsystem = require("subsystem");
 
-module.exports.name = "family_planner";
-module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.starts_active = true;
-module.exports.run = function(room) {
-    var spawns = room.findMyStructures(STRUCTURE_SPAWN);
-
-    for(var i in spawns) {
-        var spawn = spawns[i];
-        // Mark spawn age.
-        if(!spawn.memory.built_on)
-            spawn.memory.built_on = Game.time;
+class FamilyPlanner extends Subsystem {
+    constructor(mc) {
+        super(mc);
+        this.name = "family_planner";
+        this.mode = constants.PER_OWNED_ROOM;
     }
 
-    var free_spawns = room.find(FIND_MY_STRUCTURES, {
-        filter: { structureType: STRUCTURE_SPAWN, spawning: null}
-    });
+    run(room) {
+        var spawns = room.findMyStructures(STRUCTURE_SPAWN);
 
-    if(_.isEmpty(free_spawns))
-        return;
+        for(var i in spawns) {
+            var spawn = spawns[i];
+            // Mark spawn age.
+            if(!spawn.memory.built_on)
+                spawn.memory.built_on = Game.time;
+        }
 
-    // A list of {body: [...], memory: {...}} objects, from
-    // highest priority to lowest; potential children will be created in order
-    var wanted_children = [];
-
-    // Now determine what kids we want.
-    var rcl = room.controller.level;
-
-    if(rcl >= 1) {
-        wanted_children.push({
-            body: [WORK, CARRY, MOVE], 
-            memory: {
-                role: "tutorial_upgrader",
-                home_room: room.name
-            }
+        var free_spawns = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN, spawning: null}
         });
-    }
 
-    while(!_.isEmpty(free_spawns) && !_.isEmpty(wanted_children)) {
-        var child = wanted_children.shift();
-        for(var i in free_spawns) {
-            var spawn = free_spawns[i];
-            var rc = spawn.spawnCreep(child.body, "C" + Game.time.toString(), {
-                memory: child.memory
+        if(_.isEmpty(free_spawns))
+            return;
+
+        // A list of {body: [...], memory: {...}} objects, from
+        // highest priority to lowest; potential children will be created in order
+        var wanted_children = [];
+
+        // Now determine what kids we want.
+        var rcl = room.controller.level;
+
+        if(rcl >= 1) {
+            wanted_children.push({
+                body: [WORK, CARRY, MOVE], 
+                memory: {
+                    role: "tutorial_upgrader",
+                    home_room: room.name
+                }
             });
+        }
 
-            if(rc == OK) {
-                _.remove(free_spawns, spawn)
-                break;
+        var num_spawned = 0;
+
+        while(!_.isEmpty(free_spawns) && !_.isEmpty(wanted_children)) {
+            var child = wanted_children.shift();
+            for(var i in free_spawns) {
+                var spawn = free_spawns[i];
+                var name = "C" + Game.time + num_spawned;
+                var rc = spawn.spawnCreep(child.body, name, {
+                    memory: child.memory
+                });
+
+                if(rc == OK) {
+                    _.remove(free_spawns, spawn)
+                    num_spawned++;
+                    break;
+                }
             }
         }
     }
 }
+
+module.exports = FamilyPlanner;

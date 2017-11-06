@@ -1,84 +1,92 @@
 var constants = require("constants");
 var util_position = require("util_position");
+var Subsystem = require("subsystem");
 
 var extension_text = "🏠";
 var spawn_text = "🏭";
 
-module.exports.name = "extension";
-module.exports.mode = constants.PER_OWNED_ROOM;
-module.exports.starts_active = false;
-module.exports.run = function(room) {
-    if(!room.memory.extension)
-        room.memory.extension = {};
-
-    var ext = room.memory.extension;
-
-    if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
-        return;
-
-
-    if(!ext.proposed) {
-        find_best_place(room);
-    }
-    if(!ext.proposed)
-        return;
-
-    visualise_extensions(room, ext.proposed);
-
-    // Now we know where we want to build.
-    // 1) can we construct any more?
-    // 2) is there already construction in progress?
-    // 3) place a construction site nearest to existing construction
-    
-    var can_build = room.can_build_structures();
-    var selected_type = null;
-    if(can_build[STRUCTURE_SPAWN] > 0) {
-        selected_type = STRUCTURE_SPAWN;
-    } else if(can_build[STRUCTURE_EXTENSION] > 0) {
-        selected_type = STRUCTURE_EXTENSION;
-    } else if(can_build[STRUCTURE_ROAD] > 0) {
-        selected_type = STRUCTURE_ROAD;
+class Extension extends Subsystem {
+    constructor(mc) {
+        super(mc);
+        this.name = "extension";
+        this.mode = constants.PER_OWNED_ROOM;
+        this.starts_active = false;
     }
 
-    if(!selected_type)
-        return;
+    run(room) {
+        if(!room.memory.extension)
+            room.memory.extension = {};
 
-    // build the potential sites closest to the first constructed spawn,
-    // or to the controller if there is no spawn.
-    // Call this point the "landmark".
-    var landmark = find_landmark(room);
-    var closest_unbuilt = null;
-    var closest_distance = Infinity;
+        var ext = room.memory.extension;
 
-    for(var i in ext.proposed) {
-        var item = ext.proposed[i];
- 
-        var pos = RoomPosition.unpack(item.pos);
-        var stype = item.structureType;
-        if(stype != selected_type)
-            continue;
+        if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
+            return;
 
-        if(pos.look_for_structure(stype))
-            continue;
 
-        var distance = pos.getRangeTo(landmark);
-        if(distance < closest_distance) {
-            closest_distance = distance;
-            closest_unbuilt = pos;
-            //console.log(pos.stringify() + "," + distance);
+        if(!ext.proposed) {
+            find_best_place(room);
         }
+        if(!ext.proposed)
+            return;
+
+        visualise_extensions(room, ext.proposed);
+
+        // Now we know where we want to build.
+        // 1) can we construct any more?
+        // 2) is there already construction in progress?
+        // 3) place a construction site nearest to existing construction
+        
+        var can_build = room.can_build_structures();
+        var selected_type = null;
+        if(can_build[STRUCTURE_SPAWN] > 0) {
+            selected_type = STRUCTURE_SPAWN;
+        } else if(can_build[STRUCTURE_EXTENSION] > 0) {
+            selected_type = STRUCTURE_EXTENSION;
+        } else if(can_build[STRUCTURE_ROAD] > 0) {
+            selected_type = STRUCTURE_ROAD;
+        }
+
+        if(!selected_type)
+            return;
+
+        // build the potential sites closest to the first constructed spawn,
+        // or to the controller if there is no spawn.
+        // Call this point the "landmark".
+        var landmark = find_landmark(room);
+        var closest_unbuilt = null;
+        var closest_distance = Infinity;
+
+        for(var i in ext.proposed) {
+            var item = ext.proposed[i];
+     
+            var pos = RoomPosition.unpack(item.pos);
+            var stype = item.structureType;
+            if(stype != selected_type)
+                continue;
+
+            if(pos.look_for_structure(stype))
+                continue;
+
+            var distance = pos.getRangeTo(landmark);
+            if(distance < closest_distance) {
+                closest_distance = distance;
+                closest_unbuilt = pos;
+                //console.log(pos.stringify() + "," + distance);
+            }
+        }
+
+        if(closest_unbuilt) {
+            room.visual.circle(closest_unbuilt, {
+                fill: "#00ff00"
+            });
+        }
+
+        if(!closest_unbuilt.look_for_site(selected_type))
+            room.createConstructionSite(closest_unbuilt, selected_type)
     }
-
-    if(closest_unbuilt) {
-        room.visual.circle(closest_unbuilt, {
-            fill: "#00ff00"
-        });
-    }
-
-    if(!closest_unbuilt.look_for_site(selected_type))
-        room.createConstructionSite(closest_unbuilt, selected_type)
-
 }
+
+module.exports = Extension;
 
 var find_landmark = function(room) {
     var spawns = room.findMyStructures(STRUCTURE_SPAWN);
