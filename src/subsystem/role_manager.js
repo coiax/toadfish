@@ -34,8 +34,6 @@ class RoleManager extends Subsystem {
             } else {
                 console.log("No such role as: " + creep.memory.role);
             }
-
-            creep.visualise_path();
         }
     }
 }
