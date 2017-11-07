@@ -8,4 +8,12 @@ exports.GARBARGE_COLLECTOR_ORDER = -100;
 exports.DEFAULT_SUBSYSTEM_ORDER = 0;
 exports.ROLE_MANAGER_ORDER = 100;
 
-exports.SCHEDULER_EXCEPTION_STRING = "scheduler_exception_string";
+
+class SchedulerTimeout extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "SchedulerTimeout";
+    }
+}
+
+exports.SchedulerTimeout = SchedulerTimeout;

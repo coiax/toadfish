@@ -10,6 +10,7 @@ function MC() {
 
 MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_analysis"));
+    this.load_subsystem(require("subsystem_broken"));
     this.load_subsystem(require("subsystem_extension"));
     this.load_subsystem(require("subsystem_family_planner"));
     this.load_subsystem(require("subsystem_gc"));
@@ -38,8 +39,9 @@ MC.prototype.run_subsystem = function(subsystem) {
             var owned = room.controller && room.controller.my;
             if(subsystem.mode == constants.PER_OWNED_ROOM && !owned)
                 continue;
-
             subsystem.run(room);
+
+
         }
     }
 }
@@ -55,7 +57,22 @@ MC.prototype.run = function() {
                 lowest_subsystem = subsystem;
         }
 
-        this.run_subsystem(lowest_subsystem);
+        try {
+            this.run_subsystem(lowest_subsystem);
+        } catch(err) {
+            if(err instanceof constants.SchedulerTimeout) {
+                return;
+            } else {
+                var prefix = "[" + lowest_subsystem.name + "] ERROR: "
+                var suffix = "";
+                if(_.isObject(err))
+                    suffix = err.name + " - " + err.message;
+                if(_.isString(err))
+                    suffix = err;
+                console.log(prefix + suffix);
+            }
+        }
+
         delete this.active_subsystems[lowest_subsystem.name];
     }
 };

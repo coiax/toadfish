@@ -11,9 +11,9 @@ class Subsystem {
         this.starts_active = true;
     }
     check() {
-        var scheduler_is_upset = false;
-        if(scheduler_is_upset)
-            throw constants.SCHEDULER_EXCEPTION_STRING;
+        if(Game.cpu.getUsed() > Game.cpu.limit) {
+            throw new constants.SchedulerTimeout();
+        }
     }
     run(room) {
         return;
