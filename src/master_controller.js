@@ -11,9 +11,11 @@ function MC() {
 MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_analysis"));
     this.load_subsystem(require("subsystem_broken"));
+    this.load_subsystem(require("subsystem_config"));
     this.load_subsystem(require("subsystem_effect"));
     this.load_subsystem(require("subsystem_extension"));
     this.load_subsystem(require("subsystem_family_planner"));
+    this.load_subsystem(require("subsystem_flag"));
     this.load_subsystem(require("subsystem_gc"));
     this.load_subsystem(require("subsystem_role_manager"));
     this.load_subsystem(require("subsystem_scout"));
@@ -77,7 +79,7 @@ MC.prototype.run = function() {
         } catch(err) {
             if(err instanceof constants.SchedulerTimeout) {
                 // pass
-            } else if(!Memory.allow_errors && subsystem.catch_errors) {
+            } else if(Memory.config.errors == constants.ERRORS_ONE_LINE) {
                 var prefix = "[" + subsystem.name + "] ERROR: "
                 var suffix = "";
                 if(_.isObject(err))
@@ -85,8 +87,11 @@ MC.prototype.run = function() {
                 if(_.isString(err))
                     suffix = err;
                 console.log(prefix + suffix);
-            } else {
+            } else if(Memory.config.errors == constants.ERRORS_TRACE) {
                 console.log(err.stack);
+            } else if(Memory.config.errors == constants.ERRORS_CRASH) {
+                throw err;
+            } else { // Memory.config.errors == constants.ERRORS_SILENT
             }
         } finally {
             delete this.active_subsystems[subsystem.name];

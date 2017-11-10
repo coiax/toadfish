@@ -44,7 +44,7 @@ if(!Creep.prototype._moveTo) {
 
         opts = opts || {};
 
-        if(Memory.visual_move) {
+        if(Memory.config.visualise_moveTo) {
             opts.visualizePathStyle = {};
         }
 

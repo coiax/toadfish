@@ -9,7 +9,6 @@ class Subsystem {
         this.mode = constants.PER_TICK;
         this.order = constants.DEFAULT_SUBSYSTEM_ORDER;
         this.starts_active = true;
-        this.catch_errors = true;
         this.minimum_bucket = 0;
     }
     scheduler_check() {

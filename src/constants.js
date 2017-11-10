@@ -4,6 +4,7 @@ exports.PER_ROOM = "PER_ROOM";
 exports.PER_OWNED_ROOM = "PER_OWNED_ROOM";
 
 // Subsystem order: lower ones run before larger ones.
+exports.CONFIG_SUBSYSTEM_ORDER = -200;
 exports.GARBARGE_COLLECTOR_ORDER = -100;
 exports.DEFAULT_SUBSYSTEM_ORDER = 0;
 exports.SITE_SUBSYSTEM_ORDER = 90;
@@ -21,3 +22,8 @@ exports.SchedulerTimeout = SchedulerTimeout;
 
 exports.EFFECT_CIRCLE = "circle";
 exports.EFFECT_TEXT = "text";
+
+exports.ERRORS_ONE_LINE = "oneline";
+exports.ERRORS_TRACE = "trace";
+exports.ERRORS_CRASH = "crash";
+exports.ERRORS_SILENT = "silent";

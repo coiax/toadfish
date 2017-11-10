@@ -13,7 +13,8 @@ class GarbargeCollector extends Subsystem {
         var maintained = [
             {collection: Memory.structures, comparison: Game.structures},
             {collection: Memory.creeps, comparison: Game.creeps},
-            {collection: Memory.spawns, comparison: Game.spawns}
+            {collection: Memory.spawns, comparison: Game.spawns},
+            {collection: Memory.flags, comparison: Game.flags}
         ];
 
         maintained.forEach(function(obj) {
