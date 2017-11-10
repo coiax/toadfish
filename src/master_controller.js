@@ -11,11 +11,14 @@ function MC() {
 MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_analysis"));
     this.load_subsystem(require("subsystem_broken"));
+    this.load_subsystem(require("subsystem_effect"));
     this.load_subsystem(require("subsystem_extension"));
     this.load_subsystem(require("subsystem_family_planner"));
     this.load_subsystem(require("subsystem_gc"));
     this.load_subsystem(require("subsystem_role_manager"));
     this.load_subsystem(require("subsystem_scout"));
+    this.load_subsystem(require("subsystem_site"));
+    this.load_subsystem(require("subsystem_taskmaster"));
 };
 
 
@@ -39,14 +42,14 @@ MC.prototype.run_subsystem = function(subsystem) {
         //
         for(var name in Game.rooms) {
             var room = Game.rooms[name];
-            var owned = room.controller && room.controller.my;
-            if(subsystem.mode == constants.PER_OWNED_ROOM && !owned)
+            if(subsystem.mode == constants.PER_OWNED_ROOM && !room.is_my())
                 continue;
             subsystem.run(room);
 
 
         }
     }
+
 }
 
 MC.prototype.run = function() {
@@ -74,7 +77,7 @@ MC.prototype.run = function() {
         } catch(err) {
             if(err instanceof constants.SchedulerTimeout) {
                 // pass
-            } else if(subsystem.catch_errors) {
+            } else if(!Memory.allow_errors && subsystem.catch_errors) {
                 var prefix = "[" + subsystem.name + "] ERROR: "
                 var suffix = "";
                 if(_.isObject(err))
@@ -83,7 +86,7 @@ MC.prototype.run = function() {
                     suffix = err;
                 console.log(prefix + suffix);
             } else {
-                throw err;
+                console.log(err.stack);
             }
         } finally {
             delete this.active_subsystems[subsystem.name];

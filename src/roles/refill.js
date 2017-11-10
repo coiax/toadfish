@@ -8,12 +8,11 @@ module.exports.run = function(creep) {
 
     // we look for energy sources in the creep's "home room".
     // if we can't access it, or it's not ours, then the creep is marked
-    // as homeless.
-    var home_room = Game.rooms[creep.memory.home_room];
-    if(!home_room || !home_room.controller || !home_room.controller.my) {
-        creep.memory.homeless = true;
+    // as homeless by `find_home_room`
+    var home_room = creep.find_home_room();
+    if(!home_room)
         return;
-    }
+
     // If we're not in the room, just go home, and then we'll work it out when
     // we get there.
     if(creep.room.name != home_room.name) {
@@ -27,10 +26,14 @@ module.exports.run = function(creep) {
         if(target) {
             creep.memory.target_id = target.id;
         } else {
+            // How are there no valid energy sources?
             creep.memory.idle = true;
             creep.memory.target_id = undefined;
         }
     }
+
+    // TODO declare creep idle in advance if refilling would leave
+    // energy at max capacity
 
     var rc;
     if(target.structureType) {

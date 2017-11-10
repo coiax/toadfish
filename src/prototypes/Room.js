@@ -185,3 +185,35 @@ Room.prototype.find_active_sources = function() {
         }
     });
 }
+
+Room.prototype.is_my = function() {
+    if(this.controller && this.controller.my) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+Room.prototype.oversee_construction_task = function(position, stype) {
+    // Note that `position` does NOT need to be in the room, this just
+    // means the room is overseeing that construction.
+    // I suppose multiple rooms could oversee the same construction...
+    if(!this.is_my())
+        throw "cannot add construction tasks overseen by unowned rooms";
+
+    if(!this.memory.sites)
+        this.memory.sites = [];
+
+    // No duplicates per room please
+    for(var i in this.memory.sites) {
+        var item = this.memory.sites[i];
+        var cs_pos = RoomPosition.unpack(item.pos);
+        if(cs_pos.isEqualTo(position) && item.stype == stype)
+            return;
+    }
+
+    this.memory.sites.push({
+        pos: position.pack(),
+        stype: stype
+    })
+};

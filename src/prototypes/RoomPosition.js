@@ -1,3 +1,5 @@
+var constants = require("constants");
+
 RoomPosition.prototype.is_plain = function() {
     return Game.map.getTerrainAt(this) == "plain";
 };
@@ -11,6 +13,9 @@ RoomPosition.prototype.is_wall = function() {
 };
 
 RoomPosition.unpack = function(s) {
+    if(!_.isString(s)) {
+        throw new Error("Not a string: " + s);
+    }
     var parts = s.split(",");
     var x = Number(parts[0]);
     var y = Number(parts[1]);
@@ -37,10 +42,6 @@ RoomPosition.unindex = function(index, roomName="none") {
 
     return new RoomPosition(x, y, roomName);
 }
-
-RoomPosition.unpack = function(packed) {
-    return new RoomPosition(packed.x, packed.y, packed.roomName);
-};
 
 RoomPosition.prototype.look_for_X = function(X, stype) {
     var things = this.lookFor(X);
@@ -128,6 +129,37 @@ RoomPosition.prototype.get_nearby_positions = function(range) {
 RoomPosition.prototype.highlight = function(style) {
     var visual = new RoomVisual(this.roomName);
     visual.circle(this, style);
+}
+
+RoomPosition.prototype.bam = function(color="Red", decay=0.05) {
+    // Make a circle appear at this position, which decreases in size
+    // as ticks go by
+    if(!Memory.effects)
+        Memory.effects = [];
+
+    Memory.effects.push({
+        type: constants.EFFECT_CIRCLE,
+        fill: color,
+        decay: decay,
+        radius: 0.5,
+        created_at: Game.time,
+        lifetime: 100,
+        packed_pos: this.pack()
+    });
+}
+
+RoomPosition.prototype.notice = function(text) {
+    // Make text appear at this position, disappearing after 100 ticks
+    if(!Memory.effects)
+        Memory.effects = [];
+
+    Memory.effects.push({
+        type: constants.EFFECT_TEXT,
+        text: text,
+        created_at: Game.time,
+        packed_pos: this.pack(),
+        lifetime: 100
+    });
 }
 
 RoomPosition.prototype.is_valid = function() {

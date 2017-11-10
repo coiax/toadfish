@@ -55,7 +55,7 @@ class Extension extends Subsystem {
             var score = 0;
             // calculate score.
             for(var j in layout) {
-                var pos = layout[j].pos;
+                var pos = RoomPosition.unpack(layout[j].packed_pos);
                 score += values[pos.index()];
             }
             if(score > best_score) {
@@ -100,7 +100,7 @@ class Extension extends Subsystem {
         for(var i in memory.proposed) {
             var item = memory.proposed[i];
      
-            var pos = RoomPosition.unpack(item.pos);
+            var pos = RoomPosition.unpack(item.packed_pos);
             var stype = item.structureType;
             if(stype != selected_type)
                 continue;
@@ -119,8 +119,9 @@ class Extension extends Subsystem {
         if(closest_unbuilt) {
             closest_unbuilt.highlight({fill: "#00ff00"});
 
-            if(!closest_unbuilt.look_for_site(selected_type))
-                room.createConstructionSite(closest_unbuilt, selected_type)
+            if(!closest_unbuilt.look_for_site(selected_type)) {
+                room.oversee_construction_task(closest_unbuilt, selected_type);
+            }
         }
     }
 
@@ -183,11 +184,12 @@ class Extension extends Subsystem {
             var good = true;
             for(var j in layout) {
                 var item = layout[j];
-                if(item.pos.has_planning_obstruction(item.structureType)) {
+                var pos = RoomPosition.unpack(item.packed_pos);
+                if(pos.has_planning_obstruction(item.structureType)) {
                     good = false;
                     break;
                 }
-                if(excluded.includes(item.pos.stringify())) {
+                if(excluded.includes(pos.stringify())) {
                     good = false;
                     break;
                 }
@@ -196,7 +198,7 @@ class Extension extends Subsystem {
             }
 
             if(good) {
-                memory.possible.push(pos);
+                memory.possible.push(pos.pack());
             }
 
         }
@@ -234,7 +236,7 @@ var visualise_extensions = function(room, proposed) {
     for(var i in proposed) {
         var item = proposed[i];
 
-        var pos = RoomPosition.unpack(item.pos);
+        var pos = RoomPosition.unpack(item.packed_pos);
         var stype = item.structureType;
 
         if(!pos || !stype)
@@ -294,7 +296,7 @@ function apply_stamp(pos, stamp) {
             return null;
         layout.push({
             structureType: stype,
-            pos: translated
+            packed_pos: translated.pack()
         })
     }
 
