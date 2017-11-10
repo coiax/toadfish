@@ -13,15 +13,12 @@ class Analysis extends Subsystem {
         // Each tick that we own a room, perform expensive analysis,
         // storing the results in memory.
 
-        var budget = 3;
-
-        while(budget > 0) {
-            var result = closest_exit_path_distance(room)
-            if(result) {
-                budget--;
-                continue;
-            }
-            break;
+        var work_done = false;
+        while(true) {
+            work_done = closest_exit_path_distance(room) || work_done;
+            this.scheduler_check();
+            if(!work_done)
+                break;
         }
 
         //room.visualise_value_array_as_text(room.memory.exit_distance.values);

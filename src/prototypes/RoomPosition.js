@@ -10,12 +10,17 @@ RoomPosition.prototype.is_wall = function() {
     return Game.map.getTerrainAt(this) == "wall";
 };
 
+RoomPosition.unpack = function(s) {
+    var parts = s.split(",");
+    var x = Number(parts[0]);
+    var y = Number(parts[1]);
+    var roomName = parts[2];
+
+    return new RoomPosition(x, y, roomName);
+};
+
 RoomPosition.prototype.pack = function() {
-    return {
-        x: this.x,
-        y: this.y,
-        roomName: this.roomName
-    }
+    return this.stringify();
 };
 
 RoomPosition.prototype.stringify = function() {
@@ -66,7 +71,7 @@ RoomPosition.prototype.has_planning_obstruction = function(stype) {
     if(this.is_wall())
         return true;
 
-    if(this.x <= 0 || this.x >= 49 || this.y <= 0 || this.y >= 49)
+    if(!this.is_non_exit())
         return true;
 
     var stuff = this.lookFor(LOOK_CONSTRUCTION_SITES);
@@ -108,13 +113,31 @@ RoomPosition.prototype.get_nearby_positions = function(range) {
         for(var dy = -range; dy < range + 1; dy++) {
             var x = this.x + dx;
             var y = this.y + dy;
-            if(x < 0 || x > 49 || y < 0 || y > 49)
-                continue;
 
-            nearby.push(new RoomPosition(x, y, this.roomName));
+            var pos = new RoomPosition(x, y, this.roomName);
+
+            if(pos.is_valid())
+                nearby.push(pos);
         }
     }
 
     return nearby;
 
 };
+
+RoomPosition.prototype.highlight = function(style) {
+    var visual = new RoomVisual(this.roomName);
+    visual.circle(this, style);
+}
+
+RoomPosition.prototype.is_valid = function() {
+    if(this.x < 0 || this.x > 49 || this.y < 0 || this.y > 49)
+        return false;
+    return true;
+}
+
+RoomPosition.prototype.is_non_exit = function() {
+    if(this.x <= 0 || this.x >= 49 || this.y <= 0 || this.y >= 49)
+        return false;
+    return true;
+}

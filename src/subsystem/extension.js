@@ -10,26 +10,67 @@ class Extension extends Subsystem {
         super(mc);
         this.name = "extension";
         this.mode = constants.PER_OWNED_ROOM;
-        this.starts_active = false;
+        this.starts_active = true;
+        this.catch_errors = false;
+        this.minimum_bucket = 1000;
     }
 
     run(room) {
-        if(!room.memory.extension)
-            room.memory.extension = {};
-
-        var ext = room.memory.extension;
+        var memory = this.get_room_memory(room);
 
         if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
             return;
 
-
-        if(!ext.proposed) {
-            find_best_place(room);
+        if(!memory.proposed) {
+            this.find_best_place(room);
+        } else {
+            this.build_proposed_layout(room);
         }
-        if(!ext.proposed)
-            return;
+    }
 
-        visualise_extensions(room, ext.proposed);
+    find_best_place(room) {
+        var memory = this.get_room_memory(room);
+
+        if(!memory.final_possible) {
+
+            var possible = this.try_stamp(room, sixbox, {
+
+                excluded: this.generate_exclusion_zone(room)
+            });
+
+            memory.final_possible = possible;
+        }
+
+        var possible = memory.final_possible;
+        var values = room.memory.exit_distance.values;
+
+        var best_placement = null;
+        var best_score = -Infinity;
+
+        // we want to find the "best" place to put our stamps
+        // - as far as possible from any exits to the room
+        for(var i in possible) {
+            var pos = RoomPosition.unpack(possible[i]);
+            var layout = apply_stamp(pos, sixbox);
+            var score = 0;
+            // calculate score.
+            for(var j in layout) {
+                var pos = layout[j].pos;
+                score += values[pos.index()];
+            }
+            if(score > best_score) {
+                best_score = score;
+                best_placement = layout;
+            }
+        }
+
+        room.memory.extension.proposed = best_placement;
+    }
+
+    build_proposed_layout(room) {
+        var memory = this.get_room_memory(room);
+
+        visualise_extensions(room, memory.proposed);
 
         // Now we know where we want to build.
         // 1) can we construct any more?
@@ -56,8 +97,8 @@ class Extension extends Subsystem {
         var closest_unbuilt = null;
         var closest_distance = Infinity;
 
-        for(var i in ext.proposed) {
-            var item = ext.proposed[i];
+        for(var i in memory.proposed) {
+            var item = memory.proposed[i];
      
             var pos = RoomPosition.unpack(item.pos);
             var stype = item.structureType;
@@ -76,13 +117,91 @@ class Extension extends Subsystem {
         }
 
         if(closest_unbuilt) {
-            room.visual.circle(closest_unbuilt, {
-                fill: "#00ff00"
-            });
+            closest_unbuilt.highlight({fill: "#00ff00"});
+
+            if(!closest_unbuilt.look_for_site(selected_type))
+                room.createConstructionSite(closest_unbuilt, selected_type)
+        }
+    }
+
+    generate_exclusion_zone(room) {
+        var memory = this.get_room_memory(room);
+        if(memory.exclusion_zone)
+            return;
+
+        // the "exclusion zone" is any position within 3 of
+        // any controller, source or mineral
+        var exclusion_zone = [];
+
+        var things = [room.controller];
+        things = things.concat(room.find(FIND_SOURCES));
+        things = things.concat(room.find(FIND_MINERALS));
+
+        for(var i in things) {
+            var thing = things[i];
+            var zone = thing.pos.get_nearby_positions(3);
+            exclusion_zone = exclusion_zone.concat(zone);
         }
 
-        if(!closest_unbuilt.look_for_site(selected_type))
-            room.createConstructionSite(closest_unbuilt, selected_type)
+        exclusion_zone = util_position.remove_duplicates(exclusion_zone);
+        var stringed = util_position.stringify_list(exclusion_zone);
+
+        room.memory.extension.exclusion_zone = stringed;
+    }
+
+    try_stamp(room, stamp, opts) {
+        var memory = this.get_room_memory(room);
+
+        if(!opts)
+            opts = {};
+
+        var excluded = [];
+        if(opts.excluded)
+            excluded = util_position.stringify_list(opts.excluded);
+
+        // Attempt to make a spawn plan for the given room.
+        var positions = room.all_positions();
+
+        if(!memory.last_index)
+            memory.last_index = 0;
+        if(!memory.possible)
+            memory.possible = [];
+
+
+        for(var i = memory.last_index; i < positions.length; i++) {
+            this.scheduler_check();
+
+            memory.last_index = i;
+
+            var pos = positions[i];
+
+            var layout = apply_stamp(pos, stamp);
+
+            if(!layout)
+                continue;
+
+            var good = true;
+            for(var j in layout) {
+                var item = layout[j];
+                if(item.pos.has_planning_obstruction(item.structureType)) {
+                    good = false;
+                    break;
+                }
+                if(excluded.includes(item.pos.stringify())) {
+                    good = false;
+                    break;
+                }
+
+                // it's good.
+            }
+
+            if(good) {
+                memory.possible.push(pos);
+            }
+
+        }
+
+        return memory.possible;
     }
 }
 
@@ -162,6 +281,26 @@ var strings_to_stamp = function(arr) {
     return map;
 }
 
+function apply_stamp(pos, stamp) {
+    var layout = [];
+
+    for(var key in stamp) {
+        var stype = stamp[key];
+
+        var dpos = RoomPosition.unindex(key, pos.roomName);
+
+        var translated = pos.translate(dpos.x, dpos.y);
+        if(!translated.is_valid())
+            return null;
+        layout.push({
+            structureType: stype,
+            pos: translated
+        })
+    }
+
+    return layout;
+};
+
 var sixbox = strings_to_stamp([
     "      S      ",
     "    oo#oo    ",
@@ -177,106 +316,3 @@ var sixbox = strings_to_stamp([
     "      #      "
 ]);
 
-var try_stamp = function(room, stamp, opts) {
-    if(!opts)
-        opts = {};
-
-    var excluded = [];
-    if(opts.excluded)
-        excluded = util_position.stringify_list(opts.excluded);
-
-    // Attempt to make a spawn plan for the given room.
-    var positions = room.all_positions();
-    var possible = [];
-    for(var i in positions) {
-        var pos = positions[i];
-
-        var proposed = [];
-
-        var good = true;
-        for(var key in stamp) {
-            var stype = stamp[key];
-
-            var dpos = RoomPosition.unindex(key, pos.roomName);
-
-            var translated = pos.translate(dpos.x, dpos.y);
-            if(translated.has_planning_obstruction(stype)) {
-                good = false;
-                break;
-            }
-            if(excluded.includes(translated.stringify())) {
-                good = false;
-                break;
-            }
-
-            proposed.push({
-                structureType: stype,
-                pos: translated
-            });
-        }
-
-        if(good) {
-            possible.push(proposed);
-        }
-    }
-
-    return possible;
-}
-
-var find_best_place = function(room) {
-    // we want to find the "best" place to put our stamps
-    // - as far as possible from any exits to the room
-    // - not within 3 tiles of any controller, source or mineral
-
-    if(!room.memory.extension.possible) {
-        // first, generate our "exclusion zone" of positions within 3 of
-        // any controller, source or mineral
-        var exclusion_zone = [];
-
-        var things = [room.controller];
-        things = things.concat(room.find(FIND_SOURCES));
-        things = things.concat(room.find(FIND_MINERALS));
-
-        for(var i in things) {
-            var thing = things[i];
-            var zone = thing.pos.get_nearby_positions(3);
-            exclusion_zone = exclusion_zone.concat(zone);
-        }
-
-        exclusion_zone = _.uniq(exclusion_zone, function(pos) {
-            return pos.stringify();
-        });
-
-        var possible = try_stamp(room, sixbox, {
-            excluded: exclusion_zone
-        });
-
-        room.memory.extension.possible = possible;
-    }
-
-    var possible = room.memory.extension.possible;
-    var values = room.memory.exit_distance.values;
-
-    var best_placement = null;
-    var best_score = -Infinity;
-
-    // Now rank the possible places.
-    for(var i in possible) {
-        var proposed = possible[i];
-        var score = 0;
-        // calculate score.
-        for(var j in proposed) {
-            var pos = proposed[j].pos;
-            score += values[pos.index()];
-        }
-        if(score > best_score) {
-            best_score = score;
-            best_placement = proposed;
-        } else {
-            possible.split(i, 1)
-            return;
-        }
-    }
-
-    room.memory.extension.proposed = best_placement;
-}

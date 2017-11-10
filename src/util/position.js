@@ -10,3 +10,10 @@ exports.stringify_list = function(arr) {
     }
     return out;
 }
+
+exports.remove_duplicates = function(arr) {
+    // Given an array of RoomPosition objects, remove all duplicates.
+    return _.uniq(arr, function(pos) {
+        return pos.stringify();
+    });
+}

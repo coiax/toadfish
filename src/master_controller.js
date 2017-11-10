@@ -29,6 +29,9 @@ MC.prototype.load_subsystem = function(ss_cls) {
 
 
 MC.prototype.run_subsystem = function(subsystem) {
+    if(subsystem.minimum_bucket > Game.cpu.bucket)
+        return;
+
     if(subsystem.mode == constants.PER_TICK) {
         subsystem.run();
     } else if(subsystem.mode == constants.PER_ROOM
@@ -49,31 +52,42 @@ MC.prototype.run_subsystem = function(subsystem) {
 MC.prototype.run = function() {
     // Find the next SS that is active and has the lowest "order" no.
     while(!_.isEmpty(this.active_subsystems)) {
-        var lowest_subsystem = null;
+        var subsystem = null;
 
         for(var name in this.active_subsystems) {
-            var subsystem = this.active_subsystems[name];
-            if(!lowest_subsystem || subsystem.order < lowest_subsystem.order)
-                lowest_subsystem = subsystem;
+            var ss = this.active_subsystems[name];
+
+            if(!subsystem) {
+                subsystem = ss;
+            } else if(ss.order < subsystem.order) {
+                subsystem = ss;
+            }
+        }
+
+        if(subsystem === null) {
+            console.log("NO SS?");
+            break;
         }
 
         try {
-            this.run_subsystem(lowest_subsystem);
+            this.run_subsystem(subsystem);
         } catch(err) {
             if(err instanceof constants.SchedulerTimeout) {
-                return;
-            } else {
-                var prefix = "[" + lowest_subsystem.name + "] ERROR: "
+                // pass
+            } else if(subsystem.catch_errors) {
+                var prefix = "[" + subsystem.name + "] ERROR: "
                 var suffix = "";
                 if(_.isObject(err))
                     suffix = err.name + " - " + err.message;
                 if(_.isString(err))
                     suffix = err;
                 console.log(prefix + suffix);
+            } else {
+                throw err;
             }
+        } finally {
+            delete this.active_subsystems[subsystem.name];
         }
-
-        delete this.active_subsystems[lowest_subsystem.name];
     }
 };
 
