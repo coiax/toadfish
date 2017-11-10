@@ -6,6 +6,7 @@ exports.PER_OWNED_ROOM = "PER_OWNED_ROOM";
 // Subsystem order: lower ones run before larger ones.
 exports.CONFIG_SUBSYSTEM_ORDER = -200;
 exports.GARBARGE_COLLECTOR_ORDER = -100;
+exports.BODY_COUNT_SUBSYSTEM_ORDER = -90;
 exports.DEFAULT_SUBSYSTEM_ORDER = 0;
 exports.SITE_SUBSYSTEM_ORDER = 90;
 exports.ROLE_MANAGER_ORDER = 100;

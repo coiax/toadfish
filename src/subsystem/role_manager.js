@@ -7,10 +7,11 @@ var register = function(role_module) {
     registered[role_module.name] = role_module;
 }
 
-register(require("roles_tutorial_upgrader"));
 register(require("roles_cow"));
-register(require("roles_worker"));
+register(require("roles_gunner"));
 register(require("roles_refill"));
+register(require("roles_tutorial_upgrader"));
+register(require("roles_worker"));
 
 class RoleManager extends Subsystem {
     constructor(mc) {

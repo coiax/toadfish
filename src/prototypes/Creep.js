@@ -17,6 +17,9 @@ Creep.prototype.has_hauler_parts = function() {
 }
 
 Creep.prototype.has_parts = function(parts) {
+    if(!_.isArray(parts))
+        parts = [parts];
+
     // Returns true if this creep has every part in `parts`
     var has_parts = [];
     for(var i in this.body) {
@@ -45,8 +48,15 @@ if(!Creep.prototype._moveTo) {
         opts = opts || {};
 
         if(Memory.config.visualise_moveTo) {
-            opts.visualizePathStyle = {};
+            _.defaults(opts, {
+                visualizePathStyle: {}
+            });
         }
+
+        _.defaults(opts, {
+            // This stops creeps moving in lockstep.
+            reusePath: _.sample([4,5,6])
+        });
 
         if(_.isObject(first)) {
             second = opts;

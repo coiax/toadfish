@@ -32,14 +32,14 @@ class FamilyPlanner extends Subsystem {
         // Now determine what kids we want.
         var rcl = room.controller.level;
 
+        if(rcl >= 2) {
+            if(room.memory.body_count[RANGED_ATTACK] == 0) {
+                wanted_children.push([RANGED_ATTACK, MOVE]);
+            }
+        }
+
         if(rcl >= 1) {
-            wanted_children.push({
-                body: [WORK, CARRY, MOVE],
-                memory: {
-                    home_room: room.name,
-                    idle: true
-                }
-            });
+            wanted_children.push([WORK,CARRY,MOVE]);
         }
 
         var num_spawned = 0;
@@ -49,8 +49,11 @@ class FamilyPlanner extends Subsystem {
             for(var i in free_spawns) {
                 var spawn = free_spawns[i];
                 var name = "C" + Game.time + num_spawned;
-                var rc = spawn.spawnCreep(child.body, name, {
-                    memory: child.memory
+                var rc = spawn.spawnCreep(child, name, {
+                    memory: {
+                        home_room: room.name,
+                        idle: true
+                    }
                 });
 
                 if(rc == OK) {
