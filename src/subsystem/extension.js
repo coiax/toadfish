@@ -23,6 +23,13 @@ class Extension extends Subsystem {
         if(!memory.proposed) {
             this.find_best_place(room);
         } else {
+            // Delete WIP memory
+            memory.final_possible = undefined;
+            memory.exclusion_zone = undefined;
+            memory.last_index = undefined;
+            memory.possible = undefined;
+            memory.final_possible = undefined;
+
             this.build_proposed_layout(room);
         }
     }
