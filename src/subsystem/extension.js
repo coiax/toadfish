@@ -11,7 +11,7 @@ class Extension extends Subsystem {
         this.name = "extension";
         this.mode = constants.PER_OWNED_ROOM;
         this.starts_active = true;
-        this.catch_errors = false;
+        this.catch_errors = true;
         this.minimum_bucket = 1000;
     }
 
