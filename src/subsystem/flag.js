@@ -1,7 +1,7 @@
 var constants = require("constants");
 var Subsystem = require("subsystem");
 
-class Flag extends Subsystem {
+class FlagSubsystem extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "flag";
@@ -17,4 +17,4 @@ class Flag extends Subsystem {
     }
 }
 
-module.exports = Flag;
+module.exports = FlagSubsystem;
