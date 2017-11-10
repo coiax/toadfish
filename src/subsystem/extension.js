@@ -82,7 +82,7 @@ class Extension extends Subsystem {
         // 1) can we construct any more?
         // 2) is there already construction in progress?
         // 3) place a construction site nearest to existing construction
-        
+
         var can_build = room.can_build_structures();
         var selected_type = null;
         if(can_build[STRUCTURE_SPAWN] > 0) {
@@ -105,7 +105,7 @@ class Extension extends Subsystem {
 
         for(var i in memory.proposed) {
             var item = memory.proposed[i];
-     
+
             var pos = RoomPosition.unpack(item.packed_pos);
             var stype = item.structureType;
             if(stype != selected_type)
@@ -233,7 +233,7 @@ var find_landmark = function(room) {
         }
         return earliest_spawn;
     }
-    
+
 };
 
 var visualise_extensions = function(room, proposed) {

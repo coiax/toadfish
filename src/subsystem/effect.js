@@ -9,7 +9,7 @@ class Effect extends Subsystem {
     }
 
     run() {
-        if(!Memory.effects) { 
+        if(!Memory.effects) {
             Memory.effects = [];
         }
 

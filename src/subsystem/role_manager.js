@@ -31,7 +31,7 @@ class RoleManager extends Subsystem {
                 creep.memory.idle = true;
                 continue;
             }
- 
+
 
             var module = registered[creep.memory.role];
 

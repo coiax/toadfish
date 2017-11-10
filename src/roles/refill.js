@@ -76,7 +76,7 @@ var find_target = function(creep) {
         var active_sources = room.find_active_sources();
         target = creep.pos.findClosestByRange(active_sources);
     }
-    
+
     return target;
 
 }

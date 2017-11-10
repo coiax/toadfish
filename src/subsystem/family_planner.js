@@ -34,7 +34,7 @@ class FamilyPlanner extends Subsystem {
 
         if(rcl >= 1) {
             wanted_children.push({
-                body: [WORK, CARRY, MOVE], 
+                body: [WORK, CARRY, MOVE],
                 memory: {
                     home_room: room.name,
                     idle: true

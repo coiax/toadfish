@@ -63,7 +63,7 @@ var closest_exit_path_distance = function(room) {
     var pos = RoomPosition.unindex(values.length, room.name);
 
     var value = null;
-    if(pos.is_wall()) { 
+    if(pos.is_wall()) {
         value = null;
     } else {
         var closest = Infinity;
