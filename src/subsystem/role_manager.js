@@ -24,8 +24,14 @@ class RoleManager extends Subsystem {
         for(var name in Game.creeps) {
             var creep = Game.creeps[name];
 
-            if(creep.spawning)
+            if(creep.spawning) {
                 continue;
+            }
+            if(!creep.memory.role) {
+                creep.memory.idle = true;
+                continue;
+            }
+ 
 
             var module = registered[creep.memory.role];
 

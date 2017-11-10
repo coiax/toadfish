@@ -42,18 +42,37 @@ class Taskmaster extends Subsystem {
     };
 
     do_idle(creep) {
+        creep.memory.target_id = undefined;
+
         if(creep.has_worker_parts()) {
-            do_idle_worker(creep);
+            this.do_idle_worker(creep);
         }
+
+        creep.memory.idle = false;
     };
 
     do_idle_worker(creep) {
-        if(creep.carry[RESOURCE_ENERGY] == 0) {
+        if(!creep.is_full()) {
             creep.memory.role = "refill";
         } else {
-            var home_room = creep.get_home_room();
+            var home_room = creep.find_home_room();
 
             var work_sites = [home_room.controller];
+
+            for(var i in home_room.memory.sites) {
+                var item = home_room.memory.sites[i];
+                var id = item.id;
+                var cs = Game.getObjectById(id);
+                if(cs) {
+                    work_sites.push(cs);
+                }
+            }
+
+            // highly sophisticated priority algorithm
+            var selected = _.sample(work_sites);
+
+            creep.memory.role = "worker";
+            creep.memory.target_id = selected.id;
         }
     }
 }

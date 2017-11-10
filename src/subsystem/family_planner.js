@@ -36,8 +36,8 @@ class FamilyPlanner extends Subsystem {
             wanted_children.push({
                 body: [WORK, CARRY, MOVE], 
                 memory: {
-                    role: "tutorial_upgrader",
-                    home_room: room.name
+                    home_room: room.name,
+                    idle: true
                 }
             });
         }

@@ -1,7 +1,6 @@
 module.exports.name = "refill";
 module.exports.run = function(creep) {
     if(creep.is_full()) {
-        creep.memory.target_id = undefined;
         creep.memory.idle = true;
         return;
     }
@@ -28,7 +27,7 @@ module.exports.run = function(creep) {
         } else {
             // How are there no valid energy sources?
             creep.memory.idle = true;
-            creep.memory.target_id = undefined;
+            return;
         }
     }
 
@@ -45,6 +44,8 @@ module.exports.run = function(creep) {
     } else if(target.energy) {
         // source
         rc = creep.harvest(target);
+    } else {
+        creep.memory.target_id = undefined;
     }
 
     if(rc == ERR_NOT_IN_RANGE)
