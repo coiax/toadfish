@@ -7,6 +7,7 @@ class Scout extends Subsystem {
 
         this.name = "scout";
         this.mode = constants.PER_ROOM;
+        this.order = constants.SCOUT_SUBSYSTEM_ORDER;
     }
 
     run(room) {
