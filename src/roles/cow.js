@@ -17,7 +17,7 @@ module.exports.run = function(creep) {
     if(!creep.memory.time_to_pasture)
         creep.memory.time_to_pasture = 0;
 
-    if(pos != pasture) {
+    if(!creep.pos.isEqualTo(pasture)) {
         creep.moveTo(pasture);
         creep.memory.time_to_pasture++;
         // keeping track of time to pasture allows for a replacement to be

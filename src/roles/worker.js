@@ -15,13 +15,11 @@ module.exports.run = function(creep) {
         rc = creep.upgradeController(target);
     } else if(target.progressTotal) {
         rc = creep.build(target);
-    } else if(target.hitsMax) {
+    } else if(target.is_damaged() && target.hitsMax) {
         rc = creep.repair(target);
     } else {
-        console.log("Bad worker target: " + target);
         creep.memory.idle = true;
         return;
-
     }
 
     if(rc == ERR_NOT_IN_RANGE)

@@ -61,6 +61,10 @@ Creep.prototype.count_lowest_parts = function(types) {
     return _.min(values);
 }
 
+Creep.prototype.worker_level = function() {
+    return this.count_lowest_parts([WORK, CARRY, MOVE]);
+};
+
 if(!Creep.prototype._moveTo) {
     Creep.prototype._moveTo = Creep.prototype.moveTo;
 
@@ -93,7 +97,6 @@ if(!Creep.prototype._moveTo) {
 Creep.prototype.find_home_room = function() {
     var home_room = Game.rooms[this.memory.home_room];
     if(!home_room || !home_room.is_my()) {
-        this.memory.homeless = true;
         return null;
     }
     return home_room;

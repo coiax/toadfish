@@ -195,11 +195,11 @@ Room.prototype.find_structures_missing_energy = function(stype) {
         }});
 }
 
-Room.prototype.find_containers_with_energy = function() {
+Room.prototype.find_containers_with_energy = function(minimum=0) {
     return this.find(FIND_STRUCTURES, {
         filter: function(struct) {
             if(struct.structureType == STRUCTURE_CONTAINER) {
-                if(struct.store[RESOURCE_ENERGY] > 0) {
+                if(struct.store[RESOURCE_ENERGY] > 50) {
                     return true;
                 }
             }
@@ -274,5 +274,21 @@ Room.prototype.find_landmark = function() {
 
         return sorted[0];
     }
+}
 
+Room.prototype.find_idle_creeps = function(parts) {
+    let idlers = [];
+    for(let name in Game.creeps) {
+        let creep = Game.creeps[name];
+        let home_room = creep.find_home_room();
+        if(home_room.name != this.name)
+            continue;
+        if(!creep.memory.idle)
+            continue;
+        if(parts && !creep.has_parts(parts))
+            continue;
+
+        idlers.push(creep);
+    }
+    return idlers;
 }

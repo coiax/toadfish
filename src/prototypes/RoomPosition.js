@@ -61,6 +61,21 @@ RoomPosition.prototype.look_for_structure = function(stype) {
     return this.look_for_X(LOOK_STRUCTURES, stype);
 };
 
+RoomPosition.prototype.look_for_creep = function() {
+    // I mean, I think there's some tiny case where you can have
+    // multiple creeps on a tile, but I don't think it's worth
+    // worrying about
+    let creeps = this.lookFor(LOOK_CREEPS);
+    if(!_.isEmpty(creeps))
+        return creeps[0];
+    return null;
+}
+
+RoomPosition.prototype.look_for_ss = function(stype) {
+    // look for site slash structure
+    return this.look_for_structure(stype) || this.look_for_site(stype);
+}
+
 RoomPosition.prototype.has_planning_obstruction = function(stype) {
     // Is there anything in this position that would prevent us building
     // a structure here at a later date:
@@ -199,14 +214,20 @@ var symbols = {};
 symbols[STRUCTURE_CONTAINER] = "📤;";
 symbols[STRUCTURE_EXTENSION] = "🏠";
 symbols[STRUCTURE_SPAWN] = "🏭";
+symbols[constants.PASTURE] = "🌾";
 
 RoomPosition.prototype.symbol = function(stype) {
     // Display a symbol if a site/structure of `stype` is not present
     // Roads are special because I couldn't find a suitable emoji
-    if(!this.look_for_structure(stype) && !this.look_for_site(stype)) {
-        let visual = new RoomVisual(this.roomName);
+    let visual = new RoomVisual(this.roomName);
+    let symbol = symbols[stype];
+
+    if(stype == constants.PASTURE) {
+        let creep = this.look_for_creep();
+        if(!creep || creep.memory.role != "cow")
+            visual.text(symbol, this);
+    } else if(!this.look_for_ss(stype)) {
         if(stype != STRUCTURE_ROAD) {
-            let symbol = symbols[stype];
             visual.text(symbol, this);
         } else {
             visual.circle(this);

@@ -2,7 +2,6 @@ var constants = require("constants");
 var Subsystem = require("subsystem");
 
 // rice field
-var PASTURE_TEXT = "🌾"
 
 class Dairy extends Subsystem {
     constructor(mc) {
@@ -10,9 +9,17 @@ class Dairy extends Subsystem {
 
         this.name = "dairy";
         this.mode = constants.PER_OWNED_ROOM;
+        this.order = constants.DAIRY_SUBSYSTEM_ORDER;
     }
 
     run(room) {
+        // Sort them by biggest bodies first.
+        let idlers = room.find_idle_creeps([WORK,CARRY,MOVE]);
+        idlers = _.sortBy(idlers, function(creep) {
+            return creep.worker_level();
+        });
+        idlers.reverse();
+
         // Produce dedicated harvesting creeps that do nothing but
         // harvest and offload into nearby containers.
         if(!room.memory.dairy)
@@ -35,20 +42,46 @@ class Dairy extends Subsystem {
         }
 
 
-        for(let i in memory.sources) {
-            let item = memory.sources[i];
-            let dropoff = RoomPosition.unpack(item.dropoff);
+        for(let sid in memory.sources) {
+            let item = memory.sources[sid];
+            let dpos = RoomPosition.unpack(item.dropoff);
+            let dropoff = dpos.look_for_structure(STRUCTURE_CONTAINER);
 
-            let has_structure = dropoff.look_for_structure(STRUCTURE_CONTAINER);
-            let has_site = dropoff.look_for_site(STRUCTURE_CONTAINER);
+            if(!dpos.look_for_ss(STRUCTURE_CONTAINER)) {
+                room.oversee_construction_task(dpos, STRUCTURE_CONTAINER);
+                continue;
+            }
 
-            if(!has_structure && !has_site) {
-                room.oversee_construction_task(dropoff, STRUCTURE_CONTAINER);
+            if(!dropoff) {
                 continue;
             }
 
             // if the dropoff point is built, cows can start going to
             // the pasture
+            let cow = Game.getObjectById(item.cow_id);
+            let level = 0;
+            if(cow)
+                level = cow.worker_level();
+
+            if(_.isEmpty(idlers))
+                continue;
+
+            let top_idler = idlers[0];
+            if(top_idler.worker_level() > level) {
+                idlers.shift();
+                // YOU ARE NOW A COW FOREVER
+                if(cow)
+                    cow.memory.idle = true; // you are released, old cow
+                cow = top_idler;
+                item.cow_id = cow.id;
+
+                cow.memory.role = "cow";
+                cow.memory.target_id = sid;
+                let dropoff = dpos.look_for_structure(STRUCTURE_CONTAINER);
+                cow.memory.destination_id = dropoff.id;
+                cow.memory.pasture = item.pasture; // already packed.
+                cow.memory.idle = false;
+            }
         }
 
         this.visualise_source_layout(room);
@@ -100,9 +133,7 @@ class Dairy extends Subsystem {
             let dropoff = RoomPosition.unpack(item.dropoff);
 
             dropoff.symbol(STRUCTURE_CONTAINER);
-
-            let visual = new RoomVisual(pos.roomName);
-            visual.text(PASTURE_TEXT, pasture);
+            pasture.symbol(constants.PASTURE);
         };
     }
 }

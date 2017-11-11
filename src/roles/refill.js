@@ -26,6 +26,7 @@ module.exports.run = function(creep) {
             creep.memory.target_id = target.id;
         } else {
             // How are there no valid energy sources?
+            // Pretty easy, actually.
             creep.memory.idle = true;
             return;
         }
@@ -50,6 +51,8 @@ module.exports.run = function(creep) {
 
     if(rc == ERR_NOT_IN_RANGE)
         creep.moveTo(target);
+    if(rc == ERR_NOT_ENOUGH_RESOURCES)
+        creep.idle = true;
 };
 
 var find_target = function(creep) {
@@ -64,7 +67,7 @@ var find_target = function(creep) {
         target = room.storage;
     }
     if(!target) {
-        var containers = room.find_containers_with_energy();
+        var containers = room.find_containers_with_energy(50);
         // null if empty
         target = creep.pos.findClosestByRange(containers);
     }
