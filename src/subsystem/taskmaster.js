@@ -75,7 +75,7 @@ class Taskmaster extends Subsystem {
                     }
                 }
 
-                selected = creep.pos.getClosestByRange(work_sites);
+                selected = creep.pos.findClosestByRange(work_sites);
             }
 
             creep.memory.role = "worker";
