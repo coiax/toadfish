@@ -187,7 +187,7 @@ Room.prototype.find_structures_missing_energy = function(stype) {
         filter: function(str) {
             if(stype !== undefined && stype != str.structureType)
                 return false;
-            if(str.energy !== undefined && str.energyCapacity !== undefined && 
+            if(str.energy !== undefined && str.energyCapacity !== undefined &&
                 str.energy < str.energyCapacity)
                 //
                 return true;

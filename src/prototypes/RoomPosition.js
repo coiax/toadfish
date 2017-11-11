@@ -166,7 +166,7 @@ RoomPosition.prototype.bam = function(opts) {
     if(!opts)
         opts = {};
 
-    _.defaults(opts, { 
+    _.defaults(opts, {
         type: constants.EFFECT_CIRCLE,
         fill: "Red",
         decay: 0.01,
