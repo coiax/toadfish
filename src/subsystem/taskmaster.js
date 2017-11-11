@@ -56,35 +56,46 @@ class Taskmaster extends Subsystem {
         if(!creep.is_full()) {
             creep.memory.role = "refill";
             creep.memory.idle = false;
-        } else {
-            let home_room = creep.find_home_room();
-            let selected;
+            return;
+        }
 
-            // highly sophisticated priority algorithm
-            if(Math.random() < 0.5) {
-                selected = home_room.controller;
-            } else {
-                let work_sites = [home_room.controller];
+        let home_room = creep.find_home_room();
+        let selected;
 
-                for(let i in home_room.memory.sites) {
-                    let item = home_room.memory.sites[i];
-                    let id = item.id;
-                    let cs = Game.getObjectById(id);
-                    if(cs) {
-                        work_sites.push(cs);
-                    }
+        // highly sophisticated priority algorithm
+        let choice = Math.randint(1,3);
+
+        if(choice == 1) {
+            selected = home_room.controller;
+        } else if(choice == 2) {
+            let work_sites = [];
+            for(let i in home_room.memory.sites) {
+                let item = home_room.memory.sites[i];
+                let id = item.id;
+                let cs = Game.getObjectById(id);
+                if(cs) {
+                    work_sites.push(cs);
                 }
-
-                selected = creep.pos.findClosestByRange(work_sites);
             }
 
-            creep.memory.role = "worker";
-            creep.memory.target_id = selected.id;
-            creep.memory.idle = false;
+            let damaged_structures = home_room.find_damaged_structures();
+
+            work_sites = work_sites.concat(damaged_structures);
+
+            selected = creep.pos.findClosestByRange(work_sites);
+        } else if(choice == 3) {
+            return this.do_idle_hauler(creep);
         }
+
+        creep.memory.role = "worker";
+        creep.memory.target_id = selected.id;
+        creep.memory.idle = false;
     }
 
     do_idle_gunner(creep) {
+        // XXX it seems likely that military tasks will not work
+        // in the same way, so this is just a stopgap against
+        // scouts killing our construction sites
         let baddies = creep.room.find(FIND_HOSTILE_CREEPS);
         if(baddies.length) {
             let closest = creep.pos.findClosestByRange(baddies);
@@ -97,6 +108,36 @@ class Taskmaster extends Subsystem {
             creep.moveTo(home_room.controller);
             creep.signController(home_room.controller, "");
             // still idle, ready for action at any time.
+        }
+    }
+
+    do_idle_hauler(creep) {
+        // Work out who WANTS THE ENERGY and GIVE IT TO THEM
+        // TODO likely people will want other resources in the future
+        let home_room = creep.find_home_room();
+
+        if(!creep.is_full()) {
+            creep.memory.role = "refill";
+            creep.memory.idle = false;
+            return;
+        }
+
+        let priority = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER];
+        let selected;
+
+        for(let i in priority) {
+            let stype = priority[i];
+            let structs = home_room.find_structures_missing_energy(stype);
+            selected = creep.pos.findClosestByRange(structs);
+            if(selected)
+                break;
+        }
+
+        if(selected) {
+            creep.memory.role = "haul";
+            creep.memory.target_id = selected.id;
+            creep.memory.resource_type = RESOURCE_ENERGY;
+            creep.memory.idle = false;
         }
     }
 }

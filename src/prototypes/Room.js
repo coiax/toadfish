@@ -157,6 +157,44 @@ Room.prototype.findMyStructures = function(stype, opts) {
     return this.find(FIND_MY_STRUCTURES, opts);
 }
 
+Room.prototype.find_damaged_structures = function(fortifications=false) {
+    // returns a sorted list of damaged structures in the room, sorted
+    // by highest damage first
+    let structures = this.find(FIND_STRUCTURES, {
+        filter: function(str) {
+            let stype = str.structureType;
+            if(!fortifications) {
+                if(stype == STRUCTURE_WALL || stype == STRUCTURE_RAMPART) {
+                    return false;
+                }
+            }
+
+            return str.is_damaged();
+        }
+    });
+
+    let sorted = _.sortBy(structures, function(str) {
+        return str.hitsMax - str.hits;
+    });
+
+    sorted.reverse();
+
+    return sorted;
+};
+
+Room.prototype.find_structures_missing_energy = function(stype) {
+    return this.find(FIND_MY_STRUCTURES, {
+        filter: function(str) {
+            if(stype !== undefined && stype != str.structureType)
+                return false;
+            if(str.energy !== undefined && str.energyCapacity !== undefined && 
+                str.energy < str.energyCapacity)
+                //
+                return true;
+            return false;
+        }});
+}
+
 Room.prototype.find_containers_with_energy = function() {
     return this.find(FIND_STRUCTURES, {
         filter: function(struct) {

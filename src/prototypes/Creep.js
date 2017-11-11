@@ -37,6 +37,30 @@ Creep.prototype.has_parts = function(parts) {
     }
 }
 
+Creep.prototype.count_part = function(type) {
+    // TODO Can be optimised or cached
+    let tally = 0;
+    for(let i in this.body) {
+        let item = this.body[i];
+        if(item.type == type)
+            tally++;
+    }
+    return tally;
+}
+
+Creep.prototype.count_lowest_parts = function(types) {
+    // Given a list of body parts, return the lowest number that the creep has
+    // [WORK, MOVE*2, CARRY*3] -> (WORK, MOVE, CARRY) -> 1
+    // [TOUGH, MOVE*5, CARRY*3] -> (MOVE, CARRY) -> 3
+    let values = [];
+    for(let i in types) {
+        let type = types[i];
+        let count = this.count_part(type);
+        values.push(count);
+    }
+    return _.min(values);
+}
+
 if(!Creep.prototype._moveTo) {
     Creep.prototype._moveTo = Creep.prototype.moveTo;
 
