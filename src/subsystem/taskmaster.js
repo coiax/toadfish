@@ -58,20 +58,25 @@ class Taskmaster extends Subsystem {
             creep.memory.idle = false;
         } else {
             let home_room = creep.find_home_room();
-
-            let work_sites = [home_room.controller];
-
-            for(let i in home_room.memory.sites) {
-                let item = home_room.memory.sites[i];
-                let id = item.id;
-                let cs = Game.getObjectById(id);
-                if(cs) {
-                    work_sites.push(cs);
-                }
-            }
+            let selected;
 
             // highly sophisticated priority algorithm
-            let selected = _.sample(work_sites);
+            if(Math.random() < 0.5) {
+                selected = home_room.controller;
+            } else {
+                let work_sites = [home_room.controller];
+
+                for(let i in home_room.memory.sites) {
+                    let item = home_room.memory.sites[i];
+                    let id = item.id;
+                    let cs = Game.getObjectById(id);
+                    if(cs) {
+                        work_sites.push(cs);
+                    }
+                }
+
+                selected = creep.pos.getClosestByRange(work_sites);
+            }
 
             creep.memory.role = "worker";
             creep.memory.target_id = selected.id;

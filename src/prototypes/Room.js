@@ -199,7 +199,7 @@ Room.prototype.oversee_construction_task = function(position, stype) {
     // means the room is overseeing that construction.
     // I suppose multiple rooms could oversee the same construction...
     if(!this.is_my())
-        throw "cannot add construction tasks overseen by unowned rooms";
+        throw new Error("cannot add construction tasks overseen by unowned rooms");
 
     if(!this.memory.sites)
         this.memory.sites = [];
@@ -217,3 +217,24 @@ Room.prototype.oversee_construction_task = function(position, stype) {
         stype: stype
     })
 };
+
+Room.prototype.find_landmark = function() {
+    // The landmark is either the controller, or the oldest spawn.
+    // It serves as the makeshift "centre" of the room, so generally things
+    // will be pointed towards it. It *is* possible for the landmark
+    // to change
+    if(!this.is_my())
+        throw new Error("Landmarks don't exist in rooms we don't own");
+
+    var spawns = this.findMyStructures(STRUCTURE_SPAWN);
+    if(_.isEmpty(spawns)) {
+        return this.controller;
+    } else {
+        var sorted = _.sortBy(spawns, function(s) {
+            return s.memory.built_on;
+        });
+
+        return sorted[0];
+    }
+
+}

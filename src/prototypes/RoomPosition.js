@@ -107,7 +107,7 @@ RoomPosition.prototype.all_positions = function() {
     return positions;
 };
 
-RoomPosition.prototype.get_nearby_positions = function(range) {
+RoomPosition.prototype.get_nearby_positions = function(range, origin=true) {
     var nearby = [];
 
     for(var dx = -range; dx < range + 1; dx++) {
@@ -116,7 +116,8 @@ RoomPosition.prototype.get_nearby_positions = function(range) {
             var y = this.y + dy;
 
             var pos = new RoomPosition(x, y, this.roomName);
-
+            if(!origin && pos.isEqualTo(this))
+                continue;
             if(pos.is_valid())
                 nearby.push(pos);
         }
@@ -124,6 +125,16 @@ RoomPosition.prototype.get_nearby_positions = function(range) {
 
     return nearby;
 
+};
+
+RoomPosition.prototype.get_adjacent = function() {
+    return this.get_nearby_positions(1, false);
+};
+
+RoomPosition.prototype.get_walkable_adjacent = function() {
+    return _.filter(this.get_adjacent(), function(pos) {
+        return !pos.has_planning_obstruction()
+    });
 };
 
 RoomPosition.prototype.highlight = function(style) {
@@ -183,3 +194,22 @@ RoomPosition.prototype.is_non_exit = function() {
         return false;
     return true;
 }
+
+var symbols = {};
+symbols[STRUCTURE_CONTAINER] = "📤;";
+symbols[STRUCTURE_EXTENSION] = "🏠";
+symbols[STRUCTURE_SPAWN] = "🏭";
+
+RoomPosition.prototype.symbol = function(stype) {
+    // Display a symbol if a site/structure of `stype` is not present
+    // Roads are special because I couldn't find a suitable emoji
+    if(!this.look_for_structure(stype) && !this.look_for_site(stype)) {
+        let visual = new RoomVisual(this.roomName);
+        if(stype != STRUCTURE_ROAD) {
+            let symbol = symbols[stype];
+            visual.text(symbol, this);
+        } else {
+            visual.circle(this);
+        }
+    }
+};

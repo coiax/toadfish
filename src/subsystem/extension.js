@@ -2,8 +2,6 @@ var constants = require("constants");
 var util_position = require("util_position");
 var Subsystem = require("subsystem");
 
-var extension_text = "🏠";
-var spawn_text = "🏭";
 
 class Extension extends Subsystem {
     constructor(mc) {
@@ -96,10 +94,8 @@ class Extension extends Subsystem {
         if(!selected_type)
             return;
 
-        // build the potential sites closest to the first constructed spawn,
-        // or to the controller if there is no spawn.
-        // Call this point the "landmark".
-        var landmark = find_landmark(room);
+        // build the potential sites closest to the landmark
+        var landmark = room.find_landmark();
         var closest_unbuilt = null;
         var closest_distance = Infinity;
 
@@ -215,26 +211,6 @@ class Extension extends Subsystem {
 
 module.exports = Extension;
 
-var find_landmark = function(room) {
-    var spawns = room.findMyStructures(STRUCTURE_SPAWN);
-    if(_.isEmpty(spawns)) {
-        return room.controller;
-    } else {
-        var earliest_time = Infinity;
-        var earliest_spawn = null;
-
-        for(var i in spawns) {
-            var spawn = spawns[i];
-            var built_on = spawn.memory.built_on;
-            if(built_on < earliest_time) {
-                earliest_time = built_on;
-                earliest_spawn = spawn;
-            }
-        }
-        return earliest_spawn;
-    }
-
-};
 
 var visualise_extensions = function(room, proposed) {
     var visual = room.visual;
@@ -248,15 +224,7 @@ var visualise_extensions = function(room, proposed) {
         if(!pos || !stype)
             continue;
 
-        if(!pos.look_for_structure(stype) && !pos.look_for_site(stype)) {
-            if(stype == STRUCTURE_EXTENSION) {
-                visual.text(extension_text, pos);
-            } else if(stype == STRUCTURE_SPAWN) {
-                visual.text(spawn_text, pos);
-            } else if(stype == STRUCTURE_ROAD) {
-                visual.circle(pos);
-            }
-        }
+        pos.symbol(stype);
     }
 }
 
