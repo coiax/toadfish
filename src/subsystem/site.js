@@ -13,32 +13,31 @@ class Site extends Subsystem {
     }
 
     run() {
-        var unowned_sites = _.keys(Game.constructionSites);
+        let unowned_sites = _.keys(Game.constructionSites);
 
-        for(var name in Game.rooms) {
-            var room = Game.rooms[name];
+        for(let name in Game.rooms) {
+            let room = Game.rooms[name];
             if(!room.is_my())
                 continue;
             if(!room.memory.sites)
                 room.memory.sites = [];
 
-            var room_sites = room.memory.sites;
+            let room_sites = room.memory.sites;
 
-            var i = room_sites.length;
+            let i = room_sites.length;
             // go backwards so we can delete without affecting iteration
             while(i--) {
-                var item = room_sites[i];
-                var pos = RoomPosition.unpack(item.pos);
-                var cs = Game.constructionSites[item.id];
+                let item = room_sites[i];
+                let pos = RoomPosition.unpack(item.pos);
+                let cs = Game.constructionSites[item.id];
                 if(!cs) {
                     item.id = undefined;
                     cs = find_cs(pos, item.stype);
                 }
                 if(!cs) {
-                    var rc = pos.createConstructionSite(item.stype);
+                    let rc = pos.createConstructionSite(item.stype);
                     if(_.includes(BAD_CONSTRUCTION_RESPONSES, rc)) {
-                        room_sites.splice(1, i) // drop request, it's bad.
-                        console.log("Bad site: " + JSON.stringify(item));
+                        room_sites.splice(i, 1) // drop request, it's bad.
                     }
                 }
                 if(cs) {
@@ -50,15 +49,10 @@ class Site extends Subsystem {
 
         // `unowned_sites` is now a list of all construction sites
         // not "owned/overseen" by any owned rooms.
-        for(var i in unowned_sites) {
-            var id = unowned_sites[i];
-            var cs = Game.constructionSites[id];
-            /*
-            cs.pos.highlight({
-                radius: 0.5,
-                fill: "FireBrick"
-            });
-            */
+        for(let i in unowned_sites) {
+            let id = unowned_sites[i];
+            let cs = Game.constructionSites[id];
+
             cs.remove();
         }
     }
@@ -67,8 +61,8 @@ class Site extends Subsystem {
 module.exports = Site;
 
 function find_cs(pos, stype) {
-    for(var id in Game.constructionSites) {
-        var cs = Game.constructionSites[id];
+    for(let id in Game.constructionSites) {
+        let cs = Game.constructionSites[id];
         if(pos.isEqualTo(cs.pos) && stype == cs.structureType)
             return cs;
     }

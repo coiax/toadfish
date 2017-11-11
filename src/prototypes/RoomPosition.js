@@ -131,35 +131,45 @@ RoomPosition.prototype.highlight = function(style) {
     visual.circle(this, style);
 }
 
-RoomPosition.prototype.bam = function(color="Red", decay=0.05) {
+RoomPosition.prototype.bam = function(opts) {
     // Make a circle appear at this position, which decreases in size
     // as ticks go by
     if(!Memory.effects)
         Memory.effects = [];
 
-    Memory.effects.push({
+    if(!opts)
+        opts = {};
+
+    _.defaults(opts, { 
         type: constants.EFFECT_CIRCLE,
-        fill: color,
-        decay: decay,
+        fill: "Red",
+        decay: 0.01,
         radius: 0.5,
         created_at: Game.time,
-        lifetime: 100,
+        lifetime: 50,
         packed_pos: this.pack()
     });
+
+    Memory.effects.push(opts);
 }
 
-RoomPosition.prototype.notice = function(text) {
+RoomPosition.prototype.notice = function(text, opts) {
     // Make text appear at this position, disappearing after 100 ticks
     if(!Memory.effects)
         Memory.effects = [];
 
-    Memory.effects.push({
+    if(!opts)
+        opts = {};
+
+    _.defaults(opts, {
         type: constants.EFFECT_TEXT,
-        text: text,
+        text: text || "Notice!",
         created_at: Game.time,
         packed_pos: this.pack(),
-        lifetime: 100
+        lifetime: 50,
     });
+
+    Memory.effects.push(opts);
 }
 
 RoomPosition.prototype.is_valid = function() {

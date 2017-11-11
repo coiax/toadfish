@@ -13,6 +13,7 @@ MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_body_count"));
     this.load_subsystem(require("subsystem_broken"));
     this.load_subsystem(require("subsystem_config"));
+    this.load_subsystem(require("subsystem_dairy"));
     this.load_subsystem(require("subsystem_effect"));
     this.load_subsystem(require("subsystem_extension"));
     this.load_subsystem(require("subsystem_family_planner"));

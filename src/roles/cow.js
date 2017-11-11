@@ -1,16 +1,27 @@
 module.exports.name = "cow";
 module.exports.run = function(creep) {
+    if(!creep.has_worker_parts()) {
+        creep.memory.idle = true;
+        return;
+    }
     // Assert that we have WORK, CARRY, and MOVE parts.
-    var source = Game.getObjectById(creep.memory.source_id);
+    let source = Game.getObjectById(creep.memory.target_id);
 
     // Destination is where we put all the energy.
-    var destination = Game.getObjectById(creep.memory.destination_id);
+    let destination = Game.getObjectById(creep.memory.destination_id);
 
     // The pasture is the RoomPosition that the cow naturally sits on.
-    var pasture = RoomPosition.unpack(creep.memory.pasture);
+    let pasture = RoomPosition.unpack(creep.memory.pasture);
+
+
+    if(!creep.memory.time_to_pasture)
+        creep.memory.time_to_pasture = 0;
 
     if(pos != pasture) {
         creep.moveTo(pasture);
+        creep.memory.time_to_pasture++;
+        // keeping track of time to pasture allows for a replacement to be
+        // spawned in time for a seemless transition
     } else if(source.energy > 0) {
         creep.harvest(source);
         creep.transfer(destination, RESOURCE_ENERGY);

@@ -33,7 +33,7 @@ class FamilyPlanner extends Subsystem {
         var rcl = room.controller.level;
 
         if(rcl >= 2) {
-            if(room.memory.body_count[RANGED_ATTACK] == 0) {
+            if(!room.memory.body_count[RANGED_ATTACK]) {
                 wanted_children.push([RANGED_ATTACK, MOVE]);
             }
         }

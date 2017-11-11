@@ -1,5 +1,5 @@
-var constants = require("constants");
-var Subsystem = require("subsystem");
+let constants = require("constants");
+let Subsystem = require("subsystem");
 
 class Taskmaster extends Subsystem {
     constructor(mc) {
@@ -9,8 +9,8 @@ class Taskmaster extends Subsystem {
     }
 
     run() {
-        for(var name in Game.creeps) {
-            var creep = Game.creeps[name];
+        for(let name in Game.creeps) {
+            let creep = Game.creeps[name];
 
             creep.find_home_room(); // marks them as homeless if homeless
 
@@ -26,7 +26,7 @@ class Taskmaster extends Subsystem {
         // destroyed.
 
         // Assign it to the nearest (by line distance) owned room.
-        var closest = _.sortBy(Game.rooms, function(room) {
+        let closest = _.sortBy(Game.rooms, function(room) {
             if(!room.is_my())
                 return Infinity;
             return Game.map.getRoomLinearDistance(creep.room.name, room.name);
@@ -46,33 +46,52 @@ class Taskmaster extends Subsystem {
 
         if(creep.has_worker_parts()) {
             this.do_idle_worker(creep);
+        } else if(creep.has_parts(RANGED_ATTACK)) {
+            this.do_idle_gunner(creep);
         }
 
-        creep.memory.idle = false;
     };
 
     do_idle_worker(creep) {
         if(!creep.is_full()) {
             creep.memory.role = "refill";
+            creep.memory.idle = false;
         } else {
-            var home_room = creep.find_home_room();
+            let home_room = creep.find_home_room();
 
-            var work_sites = [home_room.controller];
+            let work_sites = [home_room.controller];
 
-            for(var i in home_room.memory.sites) {
-                var item = home_room.memory.sites[i];
-                var id = item.id;
-                var cs = Game.getObjectById(id);
+            for(let i in home_room.memory.sites) {
+                let item = home_room.memory.sites[i];
+                let id = item.id;
+                let cs = Game.getObjectById(id);
                 if(cs) {
                     work_sites.push(cs);
                 }
             }
 
             // highly sophisticated priority algorithm
-            var selected = _.sample(work_sites);
+            let selected = _.sample(work_sites);
 
             creep.memory.role = "worker";
             creep.memory.target_id = selected.id;
+            creep.memory.idle = false;
+        }
+    }
+
+    do_idle_gunner(creep) {
+        let baddies = creep.room.find(FIND_HOSTILE_CREEPS);
+        if(baddies.length) {
+            let closest = creep.pos.findClosestByRange(baddies);
+
+            creep.memory.role = "gunner";
+            creep.memory.target_id = closest.id;
+            creep.memory.idle = false;
+        } else {
+            let home_room = creep.find_home_room();
+            creep.moveTo(home_room.controller);
+            creep.signController(home_room.controller, "");
+            // still idle, ready for action at any time.
         }
     }
 }

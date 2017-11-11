@@ -9,6 +9,7 @@ var register = function(role_module) {
 
 register(require("roles_cow"));
 register(require("roles_gunner"));
+register(require("roles_haul"));
 register(require("roles_refill"));
 register(require("roles_tutorial_upgrader"));
 register(require("roles_worker"));
