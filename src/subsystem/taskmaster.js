@@ -51,12 +51,14 @@ class Taskmaster extends Subsystem {
             this.do_idle_worker(creep);
         } else if(creep.has_parts(RANGED_ATTACK)) {
             this.do_idle_gunner(creep);
+        } else if(creep.has_hauler_parts()) {
+            this.do_idle_hauler(creep);
         }
 
     };
 
     do_idle_worker(creep) {
-        if(!creep.is_full()) {
+        if(creep.is_empty()) {
             creep.memory.role = "refill";
             creep.memory.idle = false;
             return;
@@ -87,12 +89,15 @@ class Taskmaster extends Subsystem {
 
             selected = creep.pos.findClosestByRange(work_sites);
         } else if(choice == 3) {
-            return this.do_idle_hauler(creep);
+            this.do_idle_hauler(creep);
+            return;
+
         }
 
-        creep.memory.role = "worker";
-        creep.memory.target_id = selected.id;
-        creep.memory.idle = false;
+        if(selected)
+            creep.memory.role = "worker";
+            creep.memory.target_id = selected.id;
+            creep.memory.idle = false;
     }
 
     do_idle_gunner(creep) {
@@ -119,18 +124,17 @@ class Taskmaster extends Subsystem {
         // TODO likely people will want other resources in the future
         let home_room = creep.find_home_room();
 
-        if(!creep.is_full()) {
+        if(creep.is_empty()) {
             creep.memory.role = "refill";
             creep.memory.idle = false;
             return;
         }
 
-        let priority = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER];
+        let pri = [[STRUCTURE_SPAWN, STRUCTURE_EXTENSION], STRUCTURE_TOWER];
         let selected;
 
-        for(let i in priority) {
-            let stype = priority[i];
-            let structs = home_room.find_structures_missing_energy(stype);
+        for(let item of pri) {
+            let structs = home_room.find_structures_missing_energy(item);
             selected = creep.pos.findClosestByRange(structs);
             if(selected)
                 break;

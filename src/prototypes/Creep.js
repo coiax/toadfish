@@ -12,28 +12,34 @@ Creep.prototype.has_worker_parts = function() {
 }
 
 Creep.prototype.has_hauler_parts = function() {
-    // one that has CARRY, and MOVE parts.
-    return this.has_parts([CARRY, MOVE]);
+    // one that has CARRY, and MOVE parts and no WORK parts.
+    return this.has_parts([CARRY, MOVE], [WORK]);
 }
 
-Creep.prototype.has_parts = function(parts) {
-    if(!_.isArray(parts))
-        parts = [parts];
+Creep.prototype.has_parts = function(whitelist, blacklist) {
+    if(!_.isArray(whitelist))
+        whitelist = [whitelist];
 
-    // Returns true if this creep has every part in `parts`
-    var has_parts = [];
+    if(!_.isArray(blacklist))
+        blacklist = [blacklist];
+
+    whitelist = new Set(whitelist);
+    blacklist = new Set(blacklist);
+
+    // Returns true if this creep has every part in `whitelist`
+    // and none of the parts in `blacklist`
     for(var i in this.body) {
         var item = this.body[i];
         var type = item.type;
-        if(!_.includes(has_parts, type))
-            has_parts.push(type);
+        whitelist.delete(type);
+        if(blacklist.has(type))
+            return false;
     }
 
-    var diff = _.difference(parts, has_parts);
-    if(diff.length) {
-        return false;
-    } else {
+    if(whitelist.size == 0) {
         return true;
+    } else {
+        return false;
     }
 }
 
@@ -75,6 +81,14 @@ Creep.prototype.scatter = function() {
 
 Creep.prototype.worker_level = function() {
     return this.count_lowest_parts([WORK, CARRY, MOVE]);
+};
+
+Creep.prototype.hauler_level = function() {
+    // An ideal hauler has two CARRY per MOVE
+    let moves = this.count_part(MOVE);
+    let carries = this.count_part(CARRY);
+
+    return _.min(Math.floor(carries / 2), moves);
 };
 
 if(!Creep.prototype._moveTo) {

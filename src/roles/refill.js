@@ -37,8 +37,12 @@ module.exports.run = function(creep) {
 
     var rc;
     if(target.structureType) {
-        // storage, container
-        rc = creep.withdraw(target, RESOURCE_ENERGY);
+        if(target.store[RESOURCE_ENERGY] < 50) {
+            creep.memory.target_id = null;
+        } else {
+            // storage, container
+            rc = creep.withdraw(target, RESOURCE_ENERGY);
+        }
     } else if(target.amount) {
         // dropped resource
         rc = creep.pickup(target);
@@ -67,15 +71,15 @@ var find_target = function(creep) {
         target = room.storage;
     }
     if(!target) {
-        var containers = room.find_containers_with_energy(50);
-        // null if empty
-        target = creep.pos.findClosestByRange(containers);
-    }
-    if(!target) {
         var dropped_energy = room.find_loose_energy();
         target = creep.pos.findClosestByRange(dropped_energy);
     }
     if(!target) {
+        var containers = room.find_containers_with_energy(creep.carryCapacity);
+        // null if empty
+        target = creep.pos.findClosestByRange(containers);
+    }
+    if(!target && creep.has_worker_parts()) {
         var active_sources = room.find_active_sources();
         target = creep.pos.findClosestByRange(active_sources);
     }

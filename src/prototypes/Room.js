@@ -182,16 +182,23 @@ Room.prototype.find_damaged_structures = function(fortifications=false) {
     return sorted;
 };
 
-Room.prototype.find_structures_missing_energy = function(stype) {
+Room.prototype.find_structures_missing_energy = function(stypes) {
+    if(stypes && !_.isArray(stypes))
+        stypes = [stypes];
+
     return this.find(FIND_MY_STRUCTURES, {
         filter: function(str) {
-            if(stype !== undefined && stype != str.structureType)
+            if(str.energy === undefined || str.energyCapacity === undefined)
                 return false;
-            if(str.energy !== undefined && str.energyCapacity !== undefined &&
-                str.energy < str.energyCapacity)
-                //
-                return true;
-            return false;
+
+            if(str.energy >= str.energyCapacity)
+                return false;
+
+            if(stypes) {
+                if(!_.includes(stypes, str.structureType))
+                    return false;
+            }
+            return true;
         }});
 }
 
@@ -276,13 +283,21 @@ Room.prototype.find_landmark = function() {
     }
 }
 
-Room.prototype.find_idle_creeps = function(parts) {
-    let idlers = [];
+Room.prototype.find_creeps = function() {
+    let creeps = [];
     for(let name in Game.creeps) {
         let creep = Game.creeps[name];
         let home_room = creep.find_home_room();
         if(home_room.name != this.name)
             continue;
+        creeps.push(creep);
+    }
+    return creeps;
+}
+
+Room.prototype.find_idle_creeps = function(parts) {
+    let idlers = [];
+    for(let creep of this.find_creeps()) {
         if(!creep.memory.idle)
             continue;
         if(parts && !creep.has_parts(parts))

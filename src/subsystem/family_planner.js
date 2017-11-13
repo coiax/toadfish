@@ -50,10 +50,14 @@ class FamilyPlanner extends Subsystem {
         // ramp up to biggest possible creep, rather than expecting
         // huge things from tiny creeps
         let highest = highest_level_with_x(worker_count, PROGRESSION);
-        let current_level = (highest || 0) + 1;
+        let current_level = highest + 1;
         let possible_level = Math.min(16, Math.floor(eca / WORKER_COST));
 
         let level = Math.min(current_level, possible_level);
+
+        if(level >= 2 && count_haulers(room) < PROGRESSION) {
+            wanted_children.push(hauler_body(level));
+        }
 
         wanted_children.push(worker_body(level));
 
@@ -87,41 +91,61 @@ function count_worker_levels(room) {
     //
     // We'll define the worker's "level" as the lowest out of the three
     // parts.
-    let level_count = {};
+    let level_count = _.fill(Array(16), 0)
 
-    for(let name in Game.creeps) {
-        let creep = Game.creeps[name];
-        let home_room = creep.find_home_room();
-        if(home_room.name != room.name)
-            continue;
+    for(let creep of room.find_creeps()) {
         if(!creep.has_worker_parts())
             continue;
         let level = creep.count_lowest_parts([WORK, CARRY, MOVE]);
-        level_count[level] = (level_count[level] || 0) + 1;
+
+        // A level 3 worker "counts" as a level 1,2,and 3 worker.
+        for(let i = 0; i < level; i++) {
+            level_count[i]++;
+        }
     }
 
     return level_count;
 }
 
-function highest_level_with_x(count, x) {
-    // for a map of {1: a, 2: b, 3: c ...}, return the highest key that has a
-    // minimum value of x
-    // TODO feel free to find a better way
-    let highest_key = null;
-    for(let key in count) {
-        let value = count[key];
-        if(value >= x && (!highest_key || highest_key < key))
-            highest_key = key;
+function count_haulers(room) {
+    var count = 0;
+    for(let creep of room.find_creeps()) {
+        if(creep.has_hauler_parts())
+            count++;
     }
-    return Number(highest_key);
+    return count;
+};
 
+function highest_level_with_x(count, x) {
+    let i = count.length;
+    while(i--) {
+        let value = count[i];
+        if(value >= x)
+            return i + 1;
+    }
+
+    return 1;
 }
 
 function worker_body(level) {
     let body = [];
-    for(let i=0; i < level; i++) {
-        body.push(WORK);
+    for(let type of [WORK, CARRY, MOVE]) {
+        for(let i=0; i < level; i++) {
+            body.push(type);
+        }
+    }
+
+    return body;
+};
+
+function hauler_body(level) {
+    // A level one hauler is CARRY, CARRY, MOVE
+    // Goes up to level 16 for a CARRY*32, MOVE*16
+    let body = [];
+    for(let i=0; i < level*2; i++) {
         body.push(CARRY);
+    }
+    for(let i=0; i < level; i++) {
         body.push(MOVE);
     }
     return body;

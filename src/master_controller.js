@@ -8,24 +8,34 @@ function MC() {
     this.load_all();
 }
 
+var subsystems = [
+    "subsystem_analysis",
+    "subsystem_body_count",
+    "subsystem_broken",
+    "subsystem_config",
+    "subsystem_dairy",
+    "subsystem_effect",
+    "subsystem_extension",
+    "subsystem_family_planner",
+    "subsystem_flag",
+    "subsystem_gc",
+    "subsystem_health_monitor",
+    "subsystem_role_manager",
+    "subsystem_scout",
+    "subsystem_settler",
+    "subsystem_site",
+    "subsystem_taskmaster"
+]
+
 
 MC.prototype.load_all = function() {
-    this.load_subsystem(require("subsystem_analysis"));
-    this.load_subsystem(require("subsystem_body_count"));
-    this.load_subsystem(require("subsystem_broken"));
-    this.load_subsystem(require("subsystem_config"));
-    this.load_subsystem(require("subsystem_dairy"));
-    this.load_subsystem(require("subsystem_effect"));
-    this.load_subsystem(require("subsystem_extension"));
-    this.load_subsystem(require("subsystem_family_planner"));
-    this.load_subsystem(require("subsystem_flag"));
-    this.load_subsystem(require("subsystem_gc"));
-    this.load_subsystem(require("subsystem_health_monitor"));
-    this.load_subsystem(require("subsystem_role_manager"));
-    this.load_subsystem(require("subsystem_scout"));
-    this.load_subsystem(require("subsystem_settler"));
-    this.load_subsystem(require("subsystem_site"));
-    this.load_subsystem(require("subsystem_taskmaster"));
+    for(let reqstring of subsystems) {
+        try {
+            this.load_subsystem(require(reqstring));
+        } catch(err) {
+            util.handle_error(err);
+        }
+    }
 };
 
 
