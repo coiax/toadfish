@@ -25,7 +25,8 @@ module.exports.run = function(creep) {
 
         // GET OFF MY LAWN
         let other = pasture.look_for_creep();
-        other.scatter();
+        if(other)
+            other.scatter();
     } else {
         // sometimes energy can be dumped on the floor if the container
         // isn't emptied enough

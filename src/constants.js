@@ -35,3 +35,5 @@ exports.ERRORS_CRASH = "crash";
 exports.ERRORS_SILENT = "silent";
 
 exports.PASTURE = "pasture";
+
+exports.DISABLE_LOOKAHEAD = "disable_lookahead";
