@@ -19,6 +19,7 @@ MC.prototype.load_all = function() {
     this.load_subsystem(require("subsystem_family_planner"));
     this.load_subsystem(require("subsystem_flag"));
     this.load_subsystem(require("subsystem_gc"));
+    this.load_subsystem(require("subsystem_health_monitor"));
     this.load_subsystem(require("subsystem_role_manager"));
     this.load_subsystem(require("subsystem_scout"));
     this.load_subsystem(require("subsystem_settler"));
