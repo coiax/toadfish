@@ -1,4 +1,5 @@
 var constants = require("constants");
+var util = require("util");
 
 function MC() {
     this.subsystems = {};
@@ -81,22 +82,7 @@ MC.prototype.run = function() {
         try {
             this.run_subsystem(subsystem);
         } catch(err) {
-            if(err instanceof constants.SchedulerTimeout) {
-                // pass
-            } else if(Memory.config.errors == constants.ERRORS_ONE_LINE) {
-                var prefix = "[" + subsystem.name + "] ERROR: "
-                var suffix = "";
-                if(_.isObject(err))
-                    suffix = err.name + " - " + err.message;
-                if(_.isString(err))
-                    suffix = err;
-                console.log(prefix + suffix);
-            } else if(Memory.config.errors == constants.ERRORS_TRACE) {
-                console.log(err.stack);
-            } else if(Memory.config.errors == constants.ERRORS_CRASH) {
-                throw err;
-            } else { // Memory.config.errors == constants.ERRORS_SILENT
-            }
+            util.handle_error(err);
         } finally {
             delete this.active_subsystems[subsystem.name];
         }

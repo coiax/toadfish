@@ -1,4 +1,5 @@
 var constants = require("constants");
+var util = require("util");
 var Subsystem = require("subsystem");
 
 var registered = {};
@@ -39,7 +40,11 @@ class RoleManager extends Subsystem {
             var module = registered[creep.memory.role];
 
             if(!((module === null) || (module === undefined))) {
-                module.run(creep);
+                try {
+                    module.run(creep);
+                } catch(err) {
+                    util.handle_error(err);
+                }
             } else {
                 console.log("No such role as: " + creep.memory.role);
             }

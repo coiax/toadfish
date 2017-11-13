@@ -19,9 +19,13 @@ module.exports.run = function(creep) {
 
     if(!creep.pos.isEqualTo(pasture)) {
         creep.moveTo(pasture);
-        creep.memory.time_to_pasture++;
         // keeping track of time to pasture allows for a replacement to be
         // spawned in time for a seemless transition
+        creep.memory.time_to_pasture++;
+
+        // GET OFF MY LAWN
+        let other = pasture.look_for_creep();
+        other.scatter();
     } else {
         // sometimes energy can be dumped on the floor if the container
         // isn't emptied enough

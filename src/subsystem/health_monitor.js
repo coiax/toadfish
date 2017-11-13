@@ -43,7 +43,7 @@ class HealthMonitor extends Subsystem {
             let pos = item.pos || item;
 
             // TODO maybe react later, but for now, let's highlight it.
-            pos.highlight({fill: "OrangeRed"});
+            pos.bam({fill: "OrangeRed", radius: 1, decay: 0.1});
         }
     }
 }
