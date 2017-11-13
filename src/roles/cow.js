@@ -22,11 +22,19 @@ module.exports.run = function(creep) {
         creep.memory.time_to_pasture++;
         // keeping track of time to pasture allows for a replacement to be
         // spawned in time for a seemless transition
-    } else if(source.energy > 0) {
-        creep.harvest(source);
-        creep.transfer(destination, RESOURCE_ENERGY);
-    } else if(destination.is_damaged()) {
-        creep.repair(destination);
-        creep.withdraw(destination, RESOURCE_ENERGY);
+    } else {
+        // sometimes energy can be dumped on the floor if the container
+        // isn't emptied enough
+        var dropped = pasture.look_for_energy();
+        if(dropped)
+            creep.pickup(dropped);
+
+        if(source.energy > 0) {
+            creep.harvest(source);
+            creep.transfer(destination, RESOURCE_ENERGY);
+        } else if(destination.is_damaged()) {
+            creep.repair(destination);
+            creep.withdraw(destination, RESOURCE_ENERGY);
+        }
     }
 }

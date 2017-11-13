@@ -76,6 +76,19 @@ RoomPosition.prototype.look_for_ss = function(stype) {
     return this.look_for_structure(stype) || this.look_for_site(stype);
 }
 
+RoomPosition.prototype.look_for_resource = function(rtype) {
+    let resources = this.lookFor(LOOK_RESOURCES);
+    for(let rsc of resources) {
+        if(rsc.resourceType == rtype)
+            return rsc;
+    }
+    return null;
+}
+
+RoomPosition.prototype.look_for_energy = function() {
+    return this.look_for_resource(RESOURCE_ENERGY);
+}
+
 RoomPosition.prototype.has_planning_obstruction = function(stype) {
     // Is there anything in this position that would prevent us building
     // a structure here at a later date:
