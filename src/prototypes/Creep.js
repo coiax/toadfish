@@ -61,6 +61,18 @@ Creep.prototype.count_lowest_parts = function(types) {
     return _.min(values);
 }
 
+Creep.prototype.scatter = function() {
+    // Move in a random valid direction
+    let directions = _.shuffle([1,2,3,4,5,6,7,8]);
+    for(let dir of directions) {
+        let new_pos = this.pos.step(dir);
+        if(new_pos.is_walkable(false)) {
+            this.move(dir);
+            return;
+        }
+    }
+}
+
 Creep.prototype.worker_level = function() {
     return this.count_lowest_parts([WORK, CARRY, MOVE]);
 };

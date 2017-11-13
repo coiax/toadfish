@@ -292,3 +292,9 @@ Room.prototype.find_idle_creeps = function(parts) {
     }
     return idlers;
 }
+
+Room.prototype.in_safe_mode = function() {
+    if(!this.controller)
+        return false;
+    return this.controller.safeMode;
+}

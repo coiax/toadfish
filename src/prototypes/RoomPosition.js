@@ -161,7 +161,7 @@ RoomPosition.prototype.get_adjacent = function() {
 
 RoomPosition.prototype.get_walkable_adjacent = function() {
     return _.filter(this.get_adjacent(), function(pos) {
-        return !pos.has_planning_obstruction()
+        return pos.is_walkable();
     });
 };
 
@@ -223,6 +223,43 @@ RoomPosition.prototype.is_non_exit = function() {
     return true;
 }
 
+RoomPosition.prototype.get_room = function() {
+    // stolen from the engine source code
+    var room = Game.rooms[this.roomName];
+    if(!room) {
+        throw new Error(`Could not access room ${this.roomName}`);
+    }
+    return room;
+}
+
+RoomPosition.prototype.is_walkable = function(ignore_creeps=true) {
+    if(!this.is_valid())
+        return false;
+
+    if(this.is_wall())
+        return false;
+
+    for(var str of this.lookFor(LOOK_STRUCTURES)) {
+        if(_.includes(OBSTACLE_OBJECT_TYPES, str.structureType))
+            return false;
+    }
+
+    if(!ignore_creeps) {
+        let room = this.get_room();
+        let room_in_safe_mode = room.my && room.in_safe_mode();
+        for(var creep of this.lookFor(LOOK_CREEPS)) {
+            if(creep.my)
+                return false;
+            // enemy creeps are walkable when room is in safe mode
+            // if we own the room
+            if(!room_in_safe_mode)
+                return false;
+        }
+    }
+
+    return true;
+}
+
 var symbols = {};
 symbols[STRUCTURE_CONTAINER] = "📤;";
 symbols[STRUCTURE_EXTENSION] = "🏠";
@@ -247,3 +284,26 @@ RoomPosition.prototype.symbol = function(stype) {
         }
     }
 };
+
+RoomPosition.prototype.step = function(dir) {
+    let offsetsByDirection = {
+        [TOP]: [0,-1],
+        [TOP_RIGHT]: [1,-1],
+        [RIGHT]: [1,0],
+        [BOTTOM_RIGHT]: [1,1],
+        [BOTTOM]: [0,1],
+        [BOTTOM_LEFT]: [-1,1],
+        [LEFT]: [-1,0],
+        [TOP_LEFT]: [-1,-1]
+    };
+
+    let offset = offsetsByDirection[dir];
+    if(!offset)
+        throw new Error("Bad direction: " + dir);
+
+    let new_x = this.x + offset[0];
+    let new_y = this.y + offset[1];
+
+    return new RoomPosition(new_x, new_y, this.roomName);
+
+}
