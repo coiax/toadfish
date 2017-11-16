@@ -55,10 +55,6 @@ class FamilyPlanner extends Subsystem {
 
         let level = Math.min(current_level, possible_level);
 
-        if(level >= 2 && count_haulers(room) < PROGRESSION) {
-            wanted_children.push(hauler_body(level));
-        }
-
         wanted_children.push(worker_body(level));
 
         let num_spawned = 0;
