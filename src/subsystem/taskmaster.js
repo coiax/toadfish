@@ -10,7 +10,7 @@ class Taskmaster extends Subsystem {
 
     per_creep(creep) {
         if(creep.spawning)
-            continue;
+            return;
 
         if(!creep.find_home_room() || creep.memory.homeless)
             this.do_homeless(creep);

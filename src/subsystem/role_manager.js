@@ -24,12 +24,12 @@ class RoleManager extends Subsystem {
 
     per_creep(creep) {
         if(creep.spawning) {
-            continue;
+            return;
         }
 
         if(!creep.memory.role) {
             creep.memory.idle = true;
-            continue;
+            return;
         }
 
 
