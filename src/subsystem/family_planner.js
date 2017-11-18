@@ -1,36 +1,42 @@
 var constants = require("constants");
+var util = require("util");
 var Subsystem = require("subsystem");
 
 var PROGRESSION = 5;
 var WORKER_COST = _.sum([BODYPART_COST[MOVE],
     BODYPART_COST[WORK], BODYPART_COST[CARRY]]);
+var MAX_WORKER_LEVEL = 16; // as long as creeps have a max of 50 parts
 
 class FamilyPlanner extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "family_planner";
+
+        // Number spawned this tick, used for unique creep names
+        this.spawned = 0;
     }
 
-    per_owned_room(room) {
-        let eca = room.energyCapacityAvailable;
-        let spawns = room.findMyStructures(STRUCTURE_SPAWN);
+    per_tick() {
+        for(let name in Game.spawns) {
+            let spawn = Game.spawns[name];
 
-        for(let i in spawns) {
-            let spawn = spawns[i];
             // Mark spawn age.
-            if(!spawn.memory.built_on)
+            if(!spawn.memory.built_on) {
                 spawn.memory.built_on = Game.time;
+            }
         }
+    }
 
-        let free_spawns = room.find(FIND_MY_STRUCTURES, {
-            filter: { structureType: STRUCTURE_SPAWN, spawning: null}
-        });
+    per_owned_room(room, memory) {
+        // Determine what creeps we'd *like* to spawn
+        let bodies = this.wish_list(room);
+        // Then spawn any that are possible.
+        this.attempt_spawning(room, bodies);
+    }
 
-        if(_.isEmpty(free_spawns))
-            return;
+    wish_list(room) {
+        let eca = room.energyCapacityAvailable;
 
-        // A list of {body: [...], memory: {...}} objects, from
-        // highest priority to lowest; potential children will be created in order
         let wanted_children = [];
 
         // Now determine what kids we want.
@@ -44,26 +50,48 @@ class FamilyPlanner extends Subsystem {
 
         // If we have at least `PROGRESSION` workers of level N,
         // build N+1 workers if possible with our capacity
-        let worker_count = count_worker_levels(room);
         // This means if all creeps are wiped out, the room will slowly
         // ramp up to biggest possible creep, rather than expecting
         // huge things from tiny creeps
-        let highest = highest_level_with_x(worker_count, PROGRESSION);
-        let current_level = highest + 1;
-        let possible_level = Math.min(16, Math.floor(eca / WORKER_COST));
+        let worker_count = util.worker_count(room);
 
-        let level = Math.min(current_level, possible_level);
+        // A level 5 worker counts as a 1-4 worker
+        for(var i in worker_count) {
+            let value = worker_count[i];
+            for(let j = 0; j < i; j++) {
+                worker_count[j] += value;
+            }
+        }
 
-        wanted_children.push(worker_body(level));
+        let highest_level = 1;
 
-        let num_spawned = 0;
+        for(var i in worker_count) {
+            if(worker_count[i] >= PROGRESSION) {
+                highest_level = i + 1;
+            }
+        }
 
-        while(!_.isEmpty(free_spawns) && !_.isEmpty(wanted_children)) {
-            let child = wanted_children.shift();
-            for(let i in free_spawns) {
-                let spawn = free_spawns[i];
-                let name = "C" + Game.time + num_spawned;
-                let rc = spawn.spawnCreep(child, name, {
+
+        let possible_level = Math.floor(eca / WORKER_COST);
+
+        let level = Math.min(highest_level, possible_level, MAX_WORKER_LEVEL);
+
+        wanted_children.push(util.worker_body(level));
+
+        return wanted_children;
+    }
+
+    attempt_spawning(room, bodies) {
+        let free_spawns = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN, spawning: null}
+        });
+
+        while(!_.isEmpty(free_spawns) && !_.isEmpty(bodies)) {
+            let body = bodies.shift();
+
+            for(let spawn of free_spawns) {
+                let name = "C" + Game.time + this.spawned;
+                let rc = spawn.spawnCreep(body, name, {
                     memory: {
                         home_room: room.name,
                         idle: true
@@ -71,79 +99,13 @@ class FamilyPlanner extends Subsystem {
                 });
 
                 if(rc == OK) {
-                    _.remove(free_spawns, spawn)
-                    num_spawned++;
+                    _.remove(free_spawns, spawn);
+                    this.spawned++;
                     break;
                 }
             }
         }
     }
 }
-
-function count_worker_levels(room) {
-    // a worker with WORK*1, CARRY*1, MOVE*1 is a level 1 worker
-    // which goes up to level 16, a total of 48 parts.
-    //
-    // We'll define the worker's "level" as the lowest out of the three
-    // parts.
-    let level_count = _.fill(Array(16), 0)
-
-    for(let creep of room.find_creeps()) {
-        if(!creep.has_worker_parts())
-            continue;
-        let level = creep.count_lowest_parts([WORK, CARRY, MOVE]);
-
-        // A level 3 worker "counts" as a level 1,2,and 3 worker.
-        for(let i = 0; i < level; i++) {
-            level_count[i]++;
-        }
-    }
-
-    return level_count;
-}
-
-function count_haulers(room) {
-    var count = 0;
-    for(let creep of room.find_creeps()) {
-        if(creep.has_hauler_parts())
-            count++;
-    }
-    return count;
-};
-
-function highest_level_with_x(count, x) {
-    let i = count.length;
-    while(i--) {
-        let value = count[i];
-        if(value >= x)
-            return i + 1;
-    }
-
-    return 1;
-}
-
-function worker_body(level) {
-    let body = [];
-    for(let type of [WORK, CARRY, MOVE]) {
-        for(let i=0; i < level; i++) {
-            body.push(type);
-        }
-    }
-
-    return body;
-};
-
-function hauler_body(level) {
-    // A level one hauler is CARRY, CARRY, MOVE
-    // Goes up to level 16 for a CARRY*32, MOVE*16
-    let body = [];
-    for(let i=0; i < level*2; i++) {
-        body.push(CARRY);
-    }
-    for(let i=0; i < level; i++) {
-        body.push(MOVE);
-    }
-    return body;
-};
 
 module.exports = FamilyPlanner;

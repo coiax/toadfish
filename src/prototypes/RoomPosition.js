@@ -211,6 +211,12 @@ RoomPosition.prototype.notice = function(text, opts) {
     Memory.effects.push(opts);
 }
 
+RoomPosition.prototype.text = function(text, style) {
+    // Convience function
+    let visual = new RoomVisual(this.roomName);
+    visual.text(text, this, style);
+}
+
 RoomPosition.prototype.is_valid = function() {
     if(this.x < 0 || this.x > 49 || this.y < 0 || this.y > 49)
         return false;

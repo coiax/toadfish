@@ -44,7 +44,7 @@ class JobBoard {
         //   this many ticks before declaring the job failed
         // - destination_lookahead (default: true) - abort job if destination
         //   is visible and does not have the capacity,
-        
+
         _.defaults(opts, {
             destination_lookahead: true,
             wait_limit: 0
