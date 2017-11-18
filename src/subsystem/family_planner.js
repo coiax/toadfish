@@ -9,10 +9,9 @@ class FamilyPlanner extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "family_planner";
-        this.mode = constants.PER_OWNED_ROOM;
     }
 
-    run(room) {
+    per_owned_room(room) {
         let eca = room.energyCapacityAvailable;
         let spawns = room.findMyStructures(STRUCTURE_SPAWN);
 

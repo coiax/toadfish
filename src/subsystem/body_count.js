@@ -6,11 +6,10 @@ class BodyCount extends Subsystem {
         super(mc);
 
         this.name = "body_count";
-        this.mode = constants.PER_TICK;
         this.order = constants.BODY_COUNT_SUBSYSTEM_ORDER;
     }
 
-    run() {
+    per_tick() {
         for(let name in Memory.rooms) {
             let memory = Memory.rooms[name];
             memory.body_count = {};

@@ -7,14 +7,11 @@ class Extension extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "extension";
-        this.mode = constants.PER_OWNED_ROOM;
         this.starts_active = true;
         this.minimum_bucket = 1000;
     }
 
-    run(room) {
-        var memory = this.get_room_memory(room);
-
+    per_owned_room(room, memory) {
         if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
             return;
 

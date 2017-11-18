@@ -5,22 +5,17 @@ class Taskmaster extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "taskmaster";
-        this.mode = constants.PER_TICK;
         this.order = constants.TASKMASTER_SUBSYSTEM_ORDER;
     }
 
-    run() {
-        for(let name in Game.creeps) {
-            let creep = Game.creeps[name];
+    per_creep(creep) {
+        if(creep.spawning)
+            continue;
 
-            if(creep.spawning)
-                continue;
-
-            if(!creep.find_home_room() || creep.memory.homeless)
-                this.do_homeless(creep);
-            if(creep.memory.idle)
-                this.do_idle(creep);
-        }
+        if(!creep.find_home_room() || creep.memory.homeless)
+            this.do_homeless(creep);
+        if(creep.memory.idle)
+            this.do_idle(creep);
     }
 
     do_homeless(creep) {

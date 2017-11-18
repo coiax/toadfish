@@ -5,12 +5,11 @@ class Settler extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "settler";
-        this.mode = constants.PER_TICK;
         // settler should run AFTER the scout ss
         this.order = constants.SETTLER_SUBSYSTEM_ORDER;
     }
 
-    run() {
+    per_tick() {
     }
 
     assess(roomName) {

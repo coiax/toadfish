@@ -1,8 +1,3 @@
-// Subsystem modes.
-exports.PER_TICK = "PER_TICK";
-exports.PER_ROOM = "PER_ROOM";
-exports.PER_OWNED_ROOM = "PER_OWNED_ROOM";
-
 // Subsystem order: lower ones run before larger ones.
 exports.CONFIG_SUBSYSTEM_ORDER = -200;
 exports.HEALTH_MONITOR_ORDER = -120;

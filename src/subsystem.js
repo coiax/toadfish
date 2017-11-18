@@ -6,7 +6,6 @@ class Subsystem {
     constructor(mc) {
         this.mc = mc;
         this.name = "subsystem_" + id++;
-        this.mode = constants.PER_TICK;
         this.order = constants.DEFAULT_SUBSYSTEM_ORDER;
         this.starts_active = true;
         this.minimum_bucket = 0;
@@ -16,8 +15,21 @@ class Subsystem {
             throw new constants.SchedulerTimeout();
         }
     }
-    run(room) {
+
+    per_tick() {
         return;
+    }
+
+    per_room(room, memory) {
+        return;
+    }
+
+    per_owned_room(room, memory) {
+        return;
+    }
+
+    per_creep(creep) {
+
     }
 
     get_room_memory(room) {

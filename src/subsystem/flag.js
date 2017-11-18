@@ -5,10 +5,9 @@ class FlagSubsystem extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "flag";
-        this.mode = constants.PER_TICK;
     }
 
-    run() {
+    per_tick() {
         for(var i in Game.flags) {
             var flag = Game.flags[i];
             if(!flag.memory.created_on)

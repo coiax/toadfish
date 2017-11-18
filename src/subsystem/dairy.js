@@ -8,11 +8,10 @@ class Dairy extends Subsystem {
         super(mc);
 
         this.name = "dairy";
-        this.mode = constants.PER_OWNED_ROOM;
         this.order = constants.DAIRY_SUBSYSTEM_ORDER;
     }
 
-    run(room) {
+    per_owned_room(room, memory) {
         // Sort them by biggest bodies first.
         let idlers = room.find_idle_creeps([WORK,CARRY,MOVE]);
         idlers = _.sortBy(idlers, function(creep) {
@@ -22,10 +21,6 @@ class Dairy extends Subsystem {
 
         // Produce dedicated harvesting creeps that do nothing but
         // harvest and offload into nearby containers.
-        if(!room.memory.dairy)
-            room.memory.dairy = {};
-
-        let memory = room.memory.dairy;
         if(!memory.sources)
             memory.sources = {};
 

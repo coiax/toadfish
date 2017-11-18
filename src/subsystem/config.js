@@ -5,11 +5,10 @@ class Config extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "config";
-        this.mode = constants.PER_TICK;
         this.order = constants.CONFIG_SUBSYSTEM_ORDER;
     }
 
-    run() {
+    per_tick() {
         if(!Memory.config)
             Memory.config = {};
 

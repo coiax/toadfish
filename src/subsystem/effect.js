@@ -5,10 +5,9 @@ class Effect extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "effect";
-        this.mode = constants.PER_TICK;
     }
 
-    run() {
+    per_tick() {
         if(!Memory.effects) {
             Memory.effects = [];
         }

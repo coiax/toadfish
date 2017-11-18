@@ -5,13 +5,13 @@ class HealthMonitor extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "health_monitor";
-        this.mode = constants.PER_TICK;
 
-        // Should run before the GC
+        // Should run before the GC, to catch dead creeps that still
+        // have a memory footprint
         this.order = constants.HEALTH_MONITOR_ORDER;
     }
 
-    run() {
+    per_tick() {
         let damaged_creeps = [];
 
         for(let name in Memory.creeps) {

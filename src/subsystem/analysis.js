@@ -6,10 +6,9 @@ class Analysis extends Subsystem {
         super(mc);
 
         this.name = "analysis";
-        this.mode = constants.PER_OWNED_ROOM;
     }
 
-    run(room) {
+    per_owned_room(room, memory) {
         // Each tick that we own a room, perform expensive analysis,
         // storing the results in memory.
 

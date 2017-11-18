@@ -5,11 +5,10 @@ class GarbargeCollector extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "garbarge_collector";
-        this.mode = constants.PER_TICK;
         this.order = constants.GARBARGE_COLLECTOR_ORDER;
     }
 
-    run() {
+    per_tick() {
         var maintained = [
             {collection: Memory.structures, comparison: Game.structures},
             {collection: Memory.creeps, comparison: Game.creeps},

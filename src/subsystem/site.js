@@ -8,11 +8,10 @@ class Site extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "site";
-        this.mode = constants.PER_TICK;
         this.order = constants.SITE_SUBSYSTEM_ORDER;
     }
 
-    run() {
+    per_tick() {
         let unowned_sites = _.keys(Game.constructionSites);
 
         for(let name in Game.rooms) {

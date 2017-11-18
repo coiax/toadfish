@@ -6,14 +6,12 @@ class Scout extends Subsystem {
         super(mc);
 
         this.name = "scout";
-        this.mode = constants.PER_ROOM;
         this.order = constants.SCOUT_SUBSYSTEM_ORDER;
     }
 
-    run(room) {
+    per_room(room, memory) {
         // Store information for future consideration about expansion/attack
-        room.memory.scout = {};
-        var scout = room.memory.scout;
+        var scout = memory;
 
         scout.time = Game.time;
 

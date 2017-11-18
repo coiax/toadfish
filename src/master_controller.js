@@ -1,13 +1,6 @@
 var constants = require("constants");
 var util = require("util");
 
-function MC() {
-    this.subsystems = {};
-    this.active_subsystems = {};
-    this.nameless_id = 1;
-    this.load_all();
-}
-
 var subsystems = [
     "subsystem_analysis",
     "subsystem_body_count",
@@ -27,74 +20,83 @@ var subsystems = [
     "subsystem_taskmaster"
 ]
 
-
-MC.prototype.load_all = function() {
-    for(let reqstring of subsystems) {
-        try {
-            this.load_subsystem(require(reqstring));
-        } catch(err) {
-            util.handle_error(err);
-        }
+class MC {
+    constructor() {
+        this.subsystems = {};
+        this.active_subsystems = {};
+        this.nameless_id = 1;
+        this.load_all();
     }
-};
 
-
-MC.prototype.load_subsystem = function(ss_cls) {
-    var subsystem = new ss_cls(this);
-
-    this.subsystems[subsystem.name] = subsystem;
-    if(subsystem.starts_active)
-        this.active_subsystems[subsystem.name] = subsystem;
-};
-
-
-MC.prototype.run_subsystem = function(subsystem) {
-    if(subsystem.minimum_bucket > Game.cpu.bucket)
-        return;
-
-    if(subsystem.mode == constants.PER_TICK) {
-        subsystem.run();
-    } else if(subsystem.mode == constants.PER_ROOM
-        || subsystem.mode == constants.PER_OWNED_ROOM) {
-        //
-        for(var name in Game.rooms) {
-            var room = Game.rooms[name];
-            if(subsystem.mode == constants.PER_OWNED_ROOM && !room.is_my())
-                continue;
-            subsystem.run(room);
-
-
+    load_all() {
+        for(let reqstring of subsystems) {
+            try {
+                this.load_subsystem(require(reqstring));
+            } catch(err) {
+                util.handle_error(err);
+            }
         }
     }
 
-}
+    load_subsystem(ss_cls) {
+        var subsystem = new ss_cls(this);
 
-MC.prototype.run = function() {
-    // Find the next SS that is active and has the lowest "order" no.
-    while(!_.isEmpty(this.active_subsystems)) {
-        var subsystem = null;
+        this.subsystems[subsystem.name] = subsystem;
+        if(subsystem.starts_active) {
+            this.active_subsystems[subsystem.name] = subsystem;
+        }
+    }
 
-        for(var name in this.active_subsystems) {
-            var ss = this.active_subsystems[name];
+    run_subsystem(subsystem) {
+        if(subsystem.minimum_bucket > Game.cpu.bucket)
+            return;
 
-            if(!subsystem) {
-                subsystem = ss;
-            } else if(ss.order < subsystem.order) {
-                subsystem = ss;
+        subsystem.per_tick();
+
+        for(let name in Game.rooms) {
+            let room = Game.rooms[name];
+            let memory = subsystem.get_room_memory(room);
+
+            subsystem.per_room(room, memory);
+
+            if(room.is_my()) {
+                subsystem.per_owned_room(room, memory);
             }
         }
 
-        if(subsystem === null) {
-            console.log("NO SS?");
-            break;
+        for(let name in Game.creeps) {
+            let creep = Game.creeps[name];
+            subsystem.per_creep(creep);
         }
+    }
 
-        try {
-            this.run_subsystem(subsystem);
-        } catch(err) {
-            util.handle_error(err);
-        } finally {
-            delete this.active_subsystems[subsystem.name];
+    run() {
+        // Find the next SS that is active and has the lowest "order" no.
+        while(!_.isEmpty(this.active_subsystems)) {
+            let subsystem = null;
+
+            for(let name in this.active_subsystems) {
+                let ss = this.active_subsystems[name];
+
+                if(!subsystem) {
+                    subsystem = ss;
+                } else if(ss.order < subsystem.order) {
+                    subsystem = ss;
+                }
+            }
+
+            if(subsystem === null) {
+                console.log("NO SS?");
+                break;
+            }
+
+            try {
+                this.run_subsystem(subsystem);
+            } catch(err) {
+                util.handle_error(err);
+            } finally {
+                delete this.active_subsystems[subsystem.name];
+            }
         }
     }
 };

@@ -19,35 +19,30 @@ class RoleManager extends Subsystem {
     constructor(mc) {
         super(mc);
         this.name = "role_manager";
-        this.mode = constants.PER_TICK;
         this.order = constants.ROLE_MANAGER_ORDER;
     }
 
-    run() {
-        for(var name in Game.creeps) {
-            var creep = Game.creeps[name];
+    per_creep(creep) {
+        if(creep.spawning) {
+            continue;
+        }
 
-            if(creep.spawning) {
-                continue;
+        if(!creep.memory.role) {
+            creep.memory.idle = true;
+            continue;
+        }
+
+
+        var module = registered[creep.memory.role];
+
+        if(!((module === null) || (module === undefined))) {
+            try {
+                module.run(creep);
+            } catch(err) {
+                util.handle_error(err);
             }
-
-            if(!creep.memory.role) {
-                creep.memory.idle = true;
-                continue;
-            }
-
-
-            var module = registered[creep.memory.role];
-
-            if(!((module === null) || (module === undefined))) {
-                try {
-                    module.run(creep);
-                } catch(err) {
-                    util.handle_error(err);
-                }
-            } else {
-                console.log("No such role as: " + creep.memory.role);
-            }
+        } else {
+            console.log("No such role as: " + creep.memory.role);
         }
     }
 }
