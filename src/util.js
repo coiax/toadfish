@@ -16,7 +16,11 @@ exports.handle_error = function(err) {
             suffix = err;
         console.log(prefix + suffix);
     } else if(Memory.config.errors == constants.ERRORS_TRACE) {
-        console.log(err.stack);
+        if(err.stack) {
+            console.log(err.stack);
+        } else {
+            console.log(err);
+        }
     } else if(Memory.config.errors == constants.ERRORS_SILENT) {
         // pass
     } else { // Memory.config.errors == constants.ERRORS_CRASH

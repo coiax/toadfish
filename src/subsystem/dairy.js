@@ -11,7 +11,9 @@ class Dairy extends Subsystem {
         this.order = constants.DAIRY_SUBSYSTEM_ORDER;
     }
 
-    per_owned_room(room, memory) {
+    per_owned_room(room) {
+        let memory = this.get_memory(room);
+
         // Sort them by biggest bodies first.
         let idlers = room.find_idle_creeps([WORK,CARRY,MOVE]);
         idlers = _.sortBy(idlers, function(creep) {

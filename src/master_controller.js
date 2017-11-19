@@ -55,12 +55,11 @@ class MC {
 
         for(let name in Game.rooms) {
             let room = Game.rooms[name];
-            let memory = subsystem.get_room_memory(room);
 
-            subsystem.per_room(room, memory);
+            subsystem.per_room(room);
 
             if(room.is_my()) {
-                subsystem.per_owned_room(room, memory);
+                subsystem.per_owned_room(room);
             }
         }
 

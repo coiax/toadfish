@@ -20,11 +20,11 @@ class Subsystem {
         return;
     }
 
-    per_room(room, memory) {
+    per_room(room) {
         return;
     }
 
-    per_owned_room(room, memory) {
+    per_owned_room(room) {
         return;
     }
 
@@ -32,10 +32,14 @@ class Subsystem {
 
     }
 
-    get_room_memory(room) {
+    get_memory(room) {
         if(!room.memory[this.name])
             room.memory[this.name] = {};
         return room.memory[this.name];
+    }
+
+    set_memory(room, obj) {
+        room.memory[this.name] = obj;
     }
 }
 

@@ -27,7 +27,7 @@ class FamilyPlanner extends Subsystem {
         }
     }
 
-    per_owned_room(room, memory) {
+    per_owned_room(room) {
         // Determine what creeps we'd *like* to spawn
         let bodies = this.wish_list(room);
         // Then spawn any that are possible.

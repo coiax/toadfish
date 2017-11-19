@@ -8,7 +8,7 @@ class Analysis extends Subsystem {
         this.name = "analysis";
     }
 
-    per_owned_room(room, memory) {
+    per_owned_room(room) {
         // Each tick that we own a room, perform expensive analysis,
         // storing the results in memory.
 

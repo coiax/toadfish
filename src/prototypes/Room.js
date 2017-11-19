@@ -288,7 +288,7 @@ Room.prototype.find_creeps = function() {
     for(let name in Game.creeps) {
         let creep = Game.creeps[name];
         let home_room = creep.find_home_room();
-        if(home_room.name != this.name)
+        if(!home_room || home_room.name != this.name)
             continue;
         creeps.push(creep);
     }

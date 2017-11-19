@@ -11,32 +11,26 @@ class Extension extends Subsystem {
         this.minimum_bucket = 1000;
     }
 
-    per_owned_room(room, memory) {
+    per_owned_room(room) {
+        let memory = this.get_memory(room);
+
         if(!room.memory.exit_distance || !room.memory.exit_distance.complete)
             return;
 
         if(!memory.proposed) {
-            this.find_best_place(room);
+            this.find_best_place(room, memory);
         } else {
-            // Delete WIP memory
-            memory.final_possible = undefined;
-            memory.exclusion_zone = undefined;
-            memory.last_index = undefined;
-            memory.possible = undefined;
-            memory.final_possible = undefined;
-
-            this.build_proposed_layout(room);
+            // TODO delete WIP memory
+            this.build_proposed_layout(room, memory);
         }
     }
 
-    find_best_place(room) {
-        var memory = this.get_room_memory(room);
-
+    find_best_place(room, memory) {
         if(!memory.final_possible) {
 
-            var possible = this.try_stamp(room, sixbox, {
+            var possible = this.try_stamp(room, sixbox, memory, {
 
-                excluded: this.generate_exclusion_zone(room)
+                excluded: this.generate_exclusion_zone(room, memory)
             });
 
             memory.final_possible = possible;
@@ -68,9 +62,7 @@ class Extension extends Subsystem {
         room.memory.extension.proposed = best_placement;
     }
 
-    build_proposed_layout(room) {
-        var memory = this.get_room_memory(room);
-
+    build_proposed_layout(room, memory) {
         visualise_extensions(room, memory.proposed);
 
         // Now we know where we want to build.
@@ -124,8 +116,7 @@ class Extension extends Subsystem {
         }
     }
 
-    generate_exclusion_zone(room) {
-        var memory = this.get_room_memory(room);
+    generate_exclusion_zone(room, memory) {
         if(memory.exclusion_zone)
             return;
 
@@ -149,9 +140,7 @@ class Extension extends Subsystem {
         room.memory.extension.exclusion_zone = stringed;
     }
 
-    try_stamp(room, stamp, opts) {
-        var memory = this.get_room_memory(room);
-
+    try_stamp(room, stamp, memory, opts) {
         if(!opts)
             opts = {};
 

@@ -9,9 +9,10 @@ class Scout extends Subsystem {
         this.order = constants.SCOUT_SUBSYSTEM_ORDER;
     }
 
-    per_room(room, memory) {
+    per_room(room) {
         // Store information for future consideration about expansion/attack
-        var scout = memory;
+        let scout = {};
+        this.set_memory(room, scout);
 
         scout.time = Game.time;
 
