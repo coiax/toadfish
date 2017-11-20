@@ -61,11 +61,11 @@ exports.hauler_body = function(level) {
     return body;
 };
 
-exports.worker_count = function(room) {
+var X_count = function(room, func) {
     let level_count = _.fill(Array(16), 0)
 
     for(let creep of room.find_creeps()) {
-        let level = creep.worker_level();
+        let level = func(creep);
 
         if(level == 0) {
             continue;
@@ -78,4 +78,30 @@ exports.worker_count = function(room) {
     }
 
     return level_count;
+}
+
+exports.worker_count = function(room) {
+    return X_count(room, function(creep) {
+        return creep.worker_level();
+    });
+}
+
+exports.hauler_count = function(room) {
+    return X_count(room, function(creep) {
+        return creep.hauler_level();
+    });
+}
+
+exports.targets_count = function(creeps) {
+    // Given a list of creeps, count their target_id totals
+    let targets = {};
+
+    for(let creep of creeps) {
+        let tid = creep.memory.target_id;
+        if(tid) {
+            targets[tid] = (targets[tid] || 0) + 1;
+        }
+    }
+
+    return targets;
 }

@@ -215,9 +215,20 @@ Room.prototype.find_containers_with_energy = function(minimum=0) {
     });
 }
 
-Room.prototype.find_loose_energy = function() {
+Room.prototype.find_loose_energy = function(min_energy) {
+    if(!min_energy) {
+        min_energy = 0;
+    }
+
     return this.find(FIND_DROPPED_RESOURCES, {
-        filter: { resourceType: RESOURCE_ENERGY }
+        filter: function(rsc) {
+            if(rsc.resourceType == RESOURCE_ENERGY) {
+                if(rsc.amount >= min_energy) {
+                    return true;
+                }
+            }
+            return false;
+        }
     });
 }
 

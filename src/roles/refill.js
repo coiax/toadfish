@@ -71,7 +71,7 @@ var find_target = function(creep) {
         target = room.storage;
     }
     if(!target) {
-        var dropped_energy = room.find_loose_energy();
+        var dropped_energy = room.find_loose_energy(creep.carryCapacity);
         target = creep.pos.findClosestByRange(dropped_energy);
     }
     if(!target) {

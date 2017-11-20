@@ -84,11 +84,15 @@ Creep.prototype.worker_level = function() {
 };
 
 Creep.prototype.hauler_level = function() {
+    // Workers are not haulers.
+    if(this.has_worker_parts()) {
+        return 0;
+    }
     // An ideal hauler has two CARRY per MOVE
     let moves = this.count_part(MOVE);
     let carries = this.count_part(CARRY);
 
-    return _.min(Math.floor(carries / 2), moves);
+    return Math.min(Math.floor(carries / 2), moves);
 };
 
 if(!Creep.prototype._moveTo) {

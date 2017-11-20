@@ -6,6 +6,7 @@ var PROGRESSION = 5;
 var WORKER_COST = _.sum([BODYPART_COST[MOVE],
     BODYPART_COST[WORK], BODYPART_COST[CARRY]]);
 var MAX_WORKER_LEVEL = 16; // as long as creeps have a max of 50 parts
+var HAULERS_OFFSET = 2;
 
 class FamilyPlanner extends Subsystem {
     constructor(mc) {
@@ -35,18 +36,8 @@ class FamilyPlanner extends Subsystem {
     }
 
     wish_list(room) {
-        let eca = room.energyCapacityAvailable;
 
         let wanted_children = [];
-
-        // Now determine what kids we want.
-        let rcl = room.controller.level;
-
-        if(rcl >= 2) {
-            if(!room.memory.body_count[RANGED_ATTACK]) {
-                wanted_children.push([RANGED_ATTACK, MOVE]);
-            }
-        }
 
         // If we have at least `PROGRESSION` workers of level N,
         // build N+1 workers if possible with our capacity
@@ -75,10 +66,28 @@ class FamilyPlanner extends Subsystem {
         }
 
 
+        let eca = room.energyCapacityAvailable;
         let possible_level = Math.floor(eca / WORKER_COST);
 
         let level = Math.min(aimed_level, possible_level, MAX_WORKER_LEVEL);
-        this.spawn_text(room, "Lvl " + level);
+
+        if(level > 1) {
+            if(!room.memory.body_count[RANGED_ATTACK]) {
+                wanted_children.push([RANGED_ATTACK, MOVE]);
+            }
+        }
+
+        let haulers_wanted = level - HAULERS_OFFSET;
+        let haulers_count = _.sum(util.hauler_count(room));
+        let haulers_diff = haulers_wanted - haulers_count;
+
+        if(haulers_diff > 0) {
+            wanted_children.push(util.hauler_body(level));
+        } else {
+            haulers_diff = 0;
+        }
+
+        this.spawn_text(room, `Lvl ${level}, HW: ${haulers_diff}`);
 
         wanted_children.push(util.worker_body(level));
 

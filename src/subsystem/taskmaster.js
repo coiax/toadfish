@@ -40,19 +40,13 @@ class Taskmaster extends Subsystem {
     };
 
     do_idle(creep) {
-        creep.memory.target_id = undefined;
-
-        if(creep.has_worker_parts()) {
-            this.do_idle_worker(creep);
-        } else if(creep.has_parts(RANGED_ATTACK)) {
+        if(creep.has_parts(RANGED_ATTACK)) {
             this.do_idle_gunner(creep);
-        } else if(creep.has_hauler_parts()) {
-            this.do_idle_hauler(creep);
+            return;
         }
 
-    };
+        creep.memory.target_id = undefined;
 
-    do_idle_worker(creep) {
         if(creep.is_empty()) {
             creep.memory.role = "refill";
             creep.memory.idle = false;
@@ -60,40 +54,34 @@ class Taskmaster extends Subsystem {
         }
 
         let home_room = creep.find_home_room();
-        let selected;
 
-        // highly sophisticated priority algorithm
-        let choice = Math.randint(1,3);
+        let jobs = home_room.find_jobs();
 
-        if(choice == 1) {
-            selected = home_room.controller;
-        } else if(choice == 2) {
-            let work_sites = [];
-            for(let i in home_room.memory.sites) {
-                let item = home_room.memory.sites[i];
-                let id = item.id;
-                let cs = Game.getObjectById(id);
-                if(cs) {
-                    work_sites.push(cs);
-                }
+        if(!creep.has_worker_parts()) {
+            jobs = _.reject(jobs, { role: "worker" } );
+        }
+
+        // sort by priority, and then closest jobs with the same priority
+        jobs = _.sortByAll(jobs, "priority", function(job) {
+            let target = Game.getObjectById(job.target_id);
+            if(target) {
+                return creep.pos.getRangeTo(target);
+            } else {
+                return Infinity;
             }
+        });
 
-            let damaged_structures = home_room.find_damaged_structures();
-
-            work_sites = work_sites.concat(damaged_structures);
-
-            selected = creep.pos.findClosestByRange(work_sites);
-        } else if(choice == 3) {
-            this.do_idle_hauler(creep);
+        if(!jobs.length) {
             return;
-
         }
 
-        if(selected) {
-            creep.memory.role = "worker";
-            creep.memory.target_id = selected.id;
-            creep.memory.idle = false;
+        let selected = jobs[0];
+
+        for(var key in selected) {
+            creep.memory[key] = selected[key];
         }
+
+        creep.memory.idle = false;
     }
 
     do_idle_gunner(creep) {
@@ -112,35 +100,6 @@ class Taskmaster extends Subsystem {
             creep.moveTo(home_room.controller);
             creep.signController(home_room.controller, "");
             // still idle, ready for action at any time.
-        }
-    }
-
-    do_idle_hauler(creep) {
-        // Work out who WANTS THE ENERGY and GIVE IT TO THEM
-        // TODO likely people will want other resources in the future
-        let home_room = creep.find_home_room();
-
-        if(creep.is_empty()) {
-            creep.memory.role = "refill";
-            creep.memory.idle = false;
-            return;
-        }
-
-        let pri = [[STRUCTURE_SPAWN, STRUCTURE_EXTENSION], STRUCTURE_TOWER];
-        let selected;
-
-        for(let item of pri) {
-            let structs = home_room.find_structures_missing_energy(item);
-            selected = creep.pos.findClosestByRange(structs);
-            if(selected)
-                break;
-        }
-
-        if(selected) {
-            creep.memory.role = "haul";
-            creep.memory.target_id = selected.id;
-            creep.memory.resource_type = RESOURCE_ENERGY;
-            creep.memory.idle = false;
         }
     }
 }
