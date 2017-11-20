@@ -280,8 +280,9 @@ RoomPosition.prototype.symbol = function(stype) {
 
     if(stype == constants.PASTURE) {
         let creep = this.look_for_creep();
-        if(!creep || creep.memory.role != "cow")
+        if(!creep || !creep.memory || creep.memory.role != "cow") {
             visual.text(symbol, this);
+        }
     } else if(!this.look_for_ss(stype)) {
         if(stype != STRUCTURE_ROAD) {
             visual.text(symbol, this);
