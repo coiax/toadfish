@@ -15,5 +15,7 @@ module.exports.run = function(creep) {
     let rc = closest.recycleCreep(creep);
     if(rc == ERR_NOT_IN_RANGE) {
         creep.moveTo(closest);
+    } else if(rc == OK) {
+        creep.memory.expected_death = Game.time + 1;
     }
 };

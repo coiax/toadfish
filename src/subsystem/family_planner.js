@@ -29,6 +29,15 @@ class FamilyPlanner extends Subsystem {
     }
 
     per_owned_room(room) {
+        // Do not spawn new creeps if hostiles are present
+        // Cheap fix to stop energy supplies being depleted by neutrals
+
+        let hostiles = room.find(FIND_HOSTILE_CREEPS);
+        if(!_.isEmpty(hostiles)) {
+            this.spawn_text(room, `${hostiles.length} hostiles!`);
+            return;
+        }
+
         // Determine what creeps we'd *like* to spawn
         let bodies = this.wish_list(room);
         // Then spawn any that are possible.
