@@ -89,10 +89,11 @@ class Taskmaster extends Subsystem {
 
         }
 
-        if(selected)
+        if(selected) {
             creep.memory.role = "worker";
             creep.memory.target_id = selected.id;
             creep.memory.idle = false;
+        }
     }
 
     do_idle_gunner(creep) {

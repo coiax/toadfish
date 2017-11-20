@@ -56,29 +56,42 @@ class FamilyPlanner extends Subsystem {
         let worker_count = util.worker_count(room);
 
         // A level 5 worker counts as a 1-4 worker
-        for(var i in worker_count) {
+        for(let i = 0; i < worker_count.length; i++) {
             let value = worker_count[i];
             for(let j = 0; j < i; j++) {
                 worker_count[j] += value;
             }
         }
 
-        let highest_level = 1;
+        let aimed_level = 1;
 
-        for(var i in worker_count) {
+        for(let i = 0; i < worker_count.length; i++) {
             if(worker_count[i] >= PROGRESSION) {
-                highest_level = i + 1;
+                // index 0 is level 1, index 1 is level 2, etc.
+                let i_level = i + 1;
+                // So if we have enough level 1s, we want to make level 2s
+                aimed_level = i_level + 1;
             }
         }
 
 
         let possible_level = Math.floor(eca / WORKER_COST);
 
-        let level = Math.min(highest_level, possible_level, MAX_WORKER_LEVEL);
+        let level = Math.min(aimed_level, possible_level, MAX_WORKER_LEVEL);
+        this.spawn_text(room, "Lvl " + level);
 
         wanted_children.push(util.worker_body(level));
 
         return wanted_children;
+    }
+
+    spawn_text(room, text) {
+        for(let spawn of room.findMyStructures(STRUCTURE_SPAWN)) {
+            let below = spawn.pos.step(BOTTOM);
+            below.text(text, {
+                font: 0.5
+            });
+        }
     }
 
     attempt_spawning(room, bodies) {

@@ -13,6 +13,11 @@ module.exports.run = function(creep) {
     // The pasture is the RoomPosition that the cow naturally sits on.
     let pasture = RoomPosition.unpack(creep.memory.pasture);
 
+    if(!source || !destination || !pasture) {
+        creep.memory.idle = true;
+        return;
+    }
+
 
     if(!creep.memory.time_to_pasture)
         creep.memory.time_to_pasture = 0;

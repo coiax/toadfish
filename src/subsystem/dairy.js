@@ -57,18 +57,21 @@ class Dairy extends Subsystem {
             // the pasture
             let cow = Game.getObjectById(item.cow_id);
             let level = 0;
-            if(cow)
+            if(cow) {
                 level = cow.worker_level();
+            }
 
-            if(_.isEmpty(idlers))
+            if(_.isEmpty(idlers)) {
                 continue;
+            }
 
             let top_idler = idlers[0];
             if(top_idler.worker_level() > level) {
                 idlers.shift();
                 // YOU ARE NOW A COW FOREVER
-                if(cow)
+                if(cow) {
                     cow.memory.idle = true; // you are released, old cow
+                }
                 cow = top_idler;
                 item.cow_id = cow.id;
 
